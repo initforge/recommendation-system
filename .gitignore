@@ -1,0 +1,47 @@
+# Data
+data/raw/ml-1m.zip
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Results
+results/charts/*
+results/reports/*
+!results/charts/.gitkeep
+!results/reports/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+*.pyc
+*.pyo
+
+# Virtual env
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# Dependencies
+node_modules/
+
+# Temp
+%TEMP%nlm/
