@@ -1,113 +1,64 @@
-# 🚀 Hướng dẫn Deploy lên Streamlit Cloud
+# Hướng dẫn Deploy Hệ thống Recommender
 
-## Bước 1: Clone repo GitHub
+Kiến trúc hiện tại của dự án sử dụng mô hình **Decoupled (Tách rời Frontend và Backend)** hoàn toàn serverless, không tốn chi phí hosting duy trì máy chủ liên tục như Railway.
 
-Mở **Git Bash / Terminal** (không phải Claude Code):
-
-```bash
-# Clone repo về máy
-git clone https://github.com/initforge/recommendation-system.git
-cd recommendation-system
-
-# Tạo thư mục web_demo (xóa file mặc định nếu có)
-rm -f README.md  # hoặc giữ lại README nếu muốn
-```
-
-## Bước 2: Copy web_demo vào repo
-
-```bash
-# Copy thư mục web_demo từ P:\recommendsystem\web_demo
-# (hoặc chạy script bên dưới)
-```
-
-**Script tự động copy** — chạy trong PowerShell:
-```powershell
-# Tạo web_demo trong repo
-mkdir recommendation-system\web_demo
-mkdir recommendation-system\.streamlit
-
-# Copy app.py
-Copy-Item "P:\recommendsystem\web_demo\app.py" "recommendation-system\web_demo\app.py"
-
-# Copy config
-Copy-Item "P:\recommendsystem\.streamlit\config.toml" "recommendation-system\.streamlit\config.toml"
-
-# Copy requirements.txt
-Copy-Item "P:\recommendsystem\requirements.txt" "recommendation-system\requirements.txt"
-```
-
-## Bước 3: Push lên GitHub
-
-```bash
-cd recommendation-system
-git add .
-git commit -m "feat: Movie Recommender web demo with 4 algorithms
-
-- SVD (Matrix Factorization)
-- Item-Based CF (KNN cosine)
-- Content-Based (TF-IDF + genres)
-- Hybrid (SVD + Content weighted)
-
-- Auto-download MovieLens 1M on first run
-- Streamlit Cloud compatible"
-git push -u origin main
-```
-
-## Bước 4: Deploy lên Streamlit Cloud
+## Cấu trúc Hệ thống mới
 
 ```
-1. Mở: https://streamlit.io/cloud
-2. Sign in với GitHub account
-3. Click "New app"
-4. Repository: initforge/recommendation-system
-5. Branch: main
-6. Main file path: web_demo/app.py
-7. Click "Deploy!"
+Google Colab          Cloudflare Pages
+(Backend)             (Frontend)
+   │                      │
+notebooks/          frontend/
+   │                      │
+(Train Model)       (Giao diện tĩnh)
+(FastAPI)           (JS/HTML/Tailwind)
+   │                      │
+   └─────── ngrok ───────┘
+          (Tunnel)
 ```
 
-## Bước 5: (Tuỳ chọn) Upload full project
+## Bước 1: Khởi động Backend (Google Colab)
 
-```bash
-# Sau khi web_demo deploy xong, push toàn bộ project:
-cd recommendation-system
-git checkout -b main
+Backend chịu tải toàn bộ các tác vụ nặng: Load Dataset MovieLens 1M, Train thuật toán SVD, tính toán Cosine Similarity, và mở API.
 
-# Copy tất cả files
-cp -r P:/recommendsystem/src/ ./src/
-cp -r P:/recommendsystem/docs/ ./docs/
-cp -r P:/recommendsystem/notebooks/ ./notebooks/
-cp -r P:/recommendsystem/slides/ ./slides/
-cp P:/recommendsystem/README.md ./README.md
-cp P:/recommendsystem/.gitignore ./.gitignore
-cp P:/recommendsystem/requirements.txt ./requirements.txt
+1. Truy cập [Google Colab](https://colab.research.google.com/)
+2. Upload file `notebooks/00_full_pipeline.ipynb` lên Colab.
+3. Chạy toàn bộ các Cell (`Runtime` > `Run all`).
+4. Tại bước cuối cùng của Notebook, hệ thống sẽ yêu cầu cài đặt `ngrok`, `fastapi`, `uvicorn`. Ngrok sẽ tự động tạo một HTTP Tunnel bảo mật.
+5. Copy đường link API có dạng: `https://<random-id>.ngrok-free.dev`. 
+   > **⚠️ Lưu ý:** Đây là Backend API. Cứ mỗi lần restart Colab, đường link này sẽ thay đổi. Vùi lòng không tắt tab Colab nếu muốn web hoạt động.
 
-# Edit .gitignore để không upload data
-# (data đã được app.py download tự động)
-echo "data/" >> .gitignore
+## Bước 2: Deploy Frontend (Cloudflare Pages)
 
-git add .
-git commit -m "docs: full project with notebooks, src, docs, slides"
-git push origin main
-```
+Mã nguồn Frontend (giao diện Tĩnh Tâm / Zen) nằm toàn bộ trong thư mục `frontend/`. 
 
-## ⚠️ Lưu ý quan trọng
+### Yêu cầu:
+- Đã cài đặt [Node.js](https://nodejs.org/).
 
-### Dataset
-- Dataset MovieLens 1M **KHÔNG commit lên git** (1M rows = ~25MB compressed)
-- `app.py` tự động download dataset khi app khởi động (lần đầu ~10s)
-- Dataset được lưu trong temp directory của Streamlit Cloud
+### Lệnh Deploy tự động:
+1. Mở Terminal (Command Prompt / PowerShell).
+2. Di chuyển vào thư mục `frontend/`:
+   ```bash
+   cd frontend
+   ```
+3. Chạy lệnh deploy thông qua công cụ chính thức của Cloudflare (`wrangler`):
+   ```bash
+   npx wrangler pages deploy . --project-name movie-recsys
+   ```
+4. Đăng nhập tài khoản Cloudflare của bạn (nếu hệ thống yêu cầu).
+5. Quá trình tải code (HTML/JS/CSS) sẽ diễn ra trong khoảng 5 giây.
+6. Kết quả sẽ sinh ra link Production: `https://movie-recsys.pages.dev/`.
 
-### Requirements
-```txt
-# requirements.txt cho web_demo (đã copy ở bước 2)
-scikit-surprise>=1.1.3
-scikit-learn>=1.3.0
-pandas>=2.0.0
-numpy>=1.24.0
-streamlit>=1.28.0
-```
+## Bước 3: Sử dụng Web App
 
-### Sau khi deploy
-- URL sẽ có dạng: `https://<username>-recommendation-system.streamlit.app`
-- Share link này với Professor để demo!
-- Không cần server — hoàn toàn miễn phí với Streamlit Cloud
+1. Mở link Frontend vừa deploy (ví dụ: `https://movie-recsys.pages.dev/`).
+2. Dán link `ngrok` (lấy từ Bước 1 bên Colab) vào ô *Link API Backend*.
+3. Bấm **Kết nối ngay**. Từ lúc này, mọi thao tác phân tích phim, tính điểm SVD/Hybrid trên giao diện đều sẽ ping thẳng ngược về Google Colab để xử lý!
+
+---
+
+### Xử lý sự cố (Troubleshooting)
+
+- **Lỗi ngrok-skip-browser-warning:** Code `app.js` đã tích hợp sẵn header `ngrok-skip-browser-warning: "true"` trong lệnh `fetch()` để bỏ qua trang cảnh báo của ngrok bảo vệ tự động.
+- **Lỗi CORS (Cross-Origin Resource Sharing):** Trong file Colab (`00_full_pipeline.ipynb`), `CORSMiddleware` của FastAPI đã được setting `allow_origins=["*"]` để cho phép giao diện từ Cloudflare request tới. Đừng sửa dòng này.
+- **Tốc độ chậm khởi đầu:** Khách viếng thăm bấm lệnh *Phân Tích & Gợi Ý* lần đầu có thể mất ~1-2 giây để hệ thống warmup, các lần sau model đã cache (nhờ `joblib`) nên tốc độ sẽ trả về ngay trong 100ms.

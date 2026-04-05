@@ -1,14 +1,14 @@
 # 📋 Mục lục — Recommender System Project
 
 ## 📚 Tài liệu lý thuyết
-1. [01-gioi-thieu.md](01-gioi-thieu.md) — Recommender System là gì?
-2. [02-tai-sao-chon-phim.md](02-tai-sao-chon-phim.md) — Tại sao dùng phim + MovieLens
-3. [02b-chi-tiet-dataset.md](02b-chi-tiet-dataset.md) — Chi tiết từng file trong dataset
-4. [03-thuat-toan.md](03-thuat-toan.md) — 5 thuật toán + code mẫu (User CF, Item CF, SVD, Content-Based, Hybrid)
-5. [04-danh-gia-metrics.md](04-danh-gia-metrics.md) — RMSE, Precision, Recall
-6. [05-context-features.md](05-context-features.md) — Temporal & Demographics Analysis
-7. [06-project-structure.md](06-project-structure.md) — Cấu trúc dự án, clean code
-8. [07-implementation-roadmap.md](07-implementation-roadmap.md) — Lộ trình code từng bước
+1. [01-gioi-thieu.md](./01-gioi-thieu.md) — Recommender System là gì?
+2. [02-tai-sao-chon-phim.md](./02-tai-sao-chon-phim.md) — Tại sao dùng phim + MovieLens
+3. [02b-chi-tiet-dataset.md](./02b-chi-tiet-dataset.md) — Chi tiết từng file trong dataset
+4. [03-thuat-toan.md](./03-thuat-toan.md) — 5 thuật toán + code mẫu (User CF, Item CF, SVD, Content-Based, Hybrid)
+5. [04-danh-gia-metrics.md](./04-danh-gia-metrics.md) — RMSE, Precision, Recall
+6. [05-context-features.md](./05-context-features.md) — Temporal & Demographics Analysis
+7. [06-project-structure.md](./06-project-structure.md) — Cấu trúc dự án, clean code
+8. [07-implementation-roadmap.md](./07-implementation-roadmap.md) — Lộ trình code từng bước
 
 ---
 
@@ -28,7 +28,7 @@ Bước 5: Đọc 06, 07               → Hiểu tổ chức + lộ trình
 
 ```
 Development:  Google Colab (.ipynb)
-Web Demo:     Streamlit
+Web Demo:     Cloudflare Pages + FastAPI (ngrok)
 ML Library:   scikit-learn, scikit-surprise
 Data:         pandas, numpy
 Visualize:    matplotlib, seaborn
@@ -56,7 +56,7 @@ Visualize:    matplotlib, seaborn
 recommend-system/
 ├── docs/           ← Tài liệu (đọc hiểu)
 ├── notebooks/      ← 8 Colab notebooks
-├── web_demo/       ← Streamlit web app
+├── frontend/       ← Giao diện Web (HTML/JS/CSS)
 ├── src/            ← 5 Python modules (shared)
 │   ├── constants.py
 │   ├── data_loader.py

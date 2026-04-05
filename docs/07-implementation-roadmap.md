@@ -419,60 +419,26 @@ plt.show()
 
 ## GIAI ĐOẠN 7: Web Demo (Tuần 9)
 
-### Bước 7.1: Streamlit App
-
-```python
-# web_demo/app.py
-import streamlit as st
-import sys
-sys.path.append('..')
-from src.models import HybridRecommender
-
-st.set_page_config(page_title="Movie Recommender", page_icon="🎬")
-st.title("🎬 Movie Recommender System")
-
-# Sidebar
-st.sidebar.header("Cài đặt")
-algorithm = st.sidebar.selectbox(
-    "Thuật toán",
-    ["Hybrid", "SVD", "Content-Based"]
-)
-user_id = st.number_input("User ID", min_value=1, max_value=6040, value=1)
-top_n = st.slider("Số phim gợi ý", 5, 20, 10)
-
-if st.button("🔍 Gợi ý"):
-    from src.data_loader import load_movielens
-    ratings, movies, users = load_movielens()
-
-    if algorithm == "Hybrid":
-        model = HybridRecommender(cf_weight=0.7)
-        model.fit(ratings, movies)
-    elif algorithm == "SVD":
-        model = train_svd(ratings)
-    else:
-        from src.models import ContentBasedModel
-        model = ContentBasedModel().fit(movies)
-
-    recs = model.recommend(user_id, top_n)
-    st.success(f"✅ Top {top_n} phim cho User {user_id}")
-    for r in recs:
-        st.write(f"- {r['title']}")
-```
-
-### Chạy local
+### Bước 7.1: Frontend (Cloudflare Pages)
 
 ```bash
-cd web_demo
-pip install -r requirements.txt
-streamlit run app.py
+# Code HTML/JS (Zen Design) nằm tại thư mục frontend/
+cd frontend
+npx wrangler pages deploy . --project-name movie-recsys
+# Tự động host lên Cloudflare tĩnh hoàn toàn.
 ```
 
-### Deploy lên Streamlit Cloud
+### Bước 7.2: Backend API (Google Colab + ngrok)
+
+Mở `notebooks/00_full_pipeline.ipynb` trên Colab → Run All.
+Cell cuối cùng sẽ mở server FastAPI và kết nối `ngrok`, sinh ra một domain public (`https://xyz.ngrok...`).
+
+### Cách hoạt động (Decoupled Architecture)
 
 ```
-1. Push code lên GitHub
-2. Vào https://streamlit.io/cloud
-3. Deploy → Share link
+1. Truy cập trang web tĩnh tại Cloudflare: https://movie-recsys.pages.dev
+2. Dán link ngrok từ Colab vào ô kết nối mộc mạc.
+3. Web gọi API về Colab, model nội suy dữ liệu & trả về điểm số dự đoán.
 ```
 
 ---
@@ -511,15 +477,17 @@ streamlit run app.py
 ## Bảng deliverables
 
 ```
-TUẦN 1-2: 01_setup_eda.ipynb          ✅
-TUẦN 3:   02_user_cf.ipynb             ✅
-TUẦN 4:   03_item_cf.ipynb             ✅
-TUẦN 5:   04_svd.ipynb + 05_content_based.ipynb  ✅
-TUẦN 6:   06_hybrid.ipynb              ✅
-TUẦN 7:   07_context_analysis.ipynb    ✅
-TUẦN 8:   08_evaluation.ipynb         ✅
-TUẦN 9:   web_demo/app.py + deploy    ✅
-TUẦN 10:  slides/ + report/           ✅
+TUẦN 1-2:  notebooks/01_setup_eda.ipynb           ✅
+TUẦN 3:   notebooks/02_user_cf.ipynb            ✅
+TUẦN 4:   notebooks/03_item_cf.ipynb            ✅
+TUẦN 5:   notebooks/04_svd.ipynb +
+           notebooks/05_content_based.ipynb       ✅
+TUẦN 6:   notebooks/06_hybrid.ipynb             ✅
+TUẦN 7:   notebooks/07_context_features.ipynb    ✅
+TUẦN 8:   notebooks/08_evaluation.ipynb         ✅
+TUẦN 9:   notebooks/00_full_pipeline.ipynb →
+           frontend/ + Cloudflare pages deploy  ✅
+TUẦN 10:  slides/ + report/                    ✅
 ```
 
 ---

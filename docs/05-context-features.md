@@ -411,4 +411,4 @@ PHÂN TÍCH ĐƯỢC:
 ---
 
 ## Bài tiếp theo
-[Cấu trúc dự án](06-project-structure.md)
+[Cấu trúc dự án](./06-project-structure.md)

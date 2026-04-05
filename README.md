@@ -1,4 +1,4 @@
-# 🎬 Recommender System Project
+# Recommender System Project
 
 Hệ thống gợi ý phim sử dụng **5 thuật toán** với dataset **MovieLens 1M**.
 
@@ -15,14 +15,24 @@ Hệ thống gợi ý phim sử dụng **5 thuật toán** với dataset **Movie
 # Hoặc clone repo → Upload lên Colab
 ```
 
-### 2. Web Demo
+### 2. Backend (Google Colab / FastAPI + ngrok)
 ```bash
-cd web_demo
-pip install -r requirements.txt
-streamlit run app.py
+# Mở notebooks/00_full_pipeline.ipynb trên Google Colab
+# Chạy tất cả các cell. Cell cuối cùng sẽ khởi tạo server FastAPI và ngrok tunnel.
+# Backend sẽ cung cấp một đường link kiểu `https://xyz.ngrok-free.dev`.
 ```
 
-### 3. Dataset
+### 3. Frontend (Giao diện Tĩnh Tâm - Cloudflare Pages)
+```bash
+# Giao diện được deploy tĩnh hoàn toàn serverless trên Cloudflare Pages.
+# Truy cập: https://movie-recsys.pages.dev/
+# Dán link ngrok từ Bước 2 vào ô kết nối để sử dụng.
+# Để build / deploy code mới:
+cd frontend
+npx wrangler pages deploy . --project-name movie-recsys
+```
+
+### 4. Dataset
 ```bash
 # Tải MovieLens 1M
 wget https://files.grouplens.org/datasets/movielens/ml-1m.zip
@@ -42,16 +52,24 @@ unzip ml-1m.zip -d data/raw/
 ## Thêm
 
 - **Context Analysis**: Temporal (timestamp) + Demographics (gender, age, occupation)
-- **Evaluation**: RMSE, Precision, Recall
+- **Evaluation**: RMSE, MAE, Precision@K, Recall@K, MAP@K, NDCG@K
 
 ## Cấu trúc
 
 ```
 docs/          ← Tài liệu lý thuyết
-notebooks/     ← 8 Colab notebooks
-web_demo/      ← Streamlit web app
+notebooks/     ← 8 Colab notebooks + 1 full pipeline notebook
+frontend/     ← Giao diện tĩnh (HTML/CSS/JS Tailwind) - Cloudflare Pages
+  ├── index.html       ← Màn hình giao diện (Zen Design)
+  └── app.js           ← Logic kết nối ngrok API
 src/           ← 5 Python modules (shared)
 data/          ← Dataset
-results/       ← Charts + reports
+results/       ← Charts + reports (JSON)
 slides/        ← Slide notes
 ```
+
+## Chạy Evaluation (Export JSON)
+
+Mở `notebooks/00_full_pipeline.ipynb` trên Colab và chạy toàn bộ:
+- Export tất cả kết quả ra `results/reports/*.json`
+- Kết quả sẽ tự động load lên web demo khi deploy

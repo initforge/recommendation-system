@@ -37,11 +37,9 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/
 
-# Streamlit secrets
-.streamlit/secrets.toml
+# Saved models
+models/*.pkl
+models/*.joblib
 
 # Dependencies
 node_modules/
-
-# Temp
-%TEMP%nlm/

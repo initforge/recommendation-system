@@ -178,35 +178,67 @@ class ContentBasedModel:
 # HYBRID
 # ============================================================
 class HybridRecommender:
-    """Hybrid: SVD + Content-Based (weighted)."""
+    """Hybrid: SVD + Content-Based (weighted).
+
+    Accepts pre-trained models to avoid re-training on every call.
+    Uses vectorized cosine similarity for Content-Based scoring.
+    """
 
     def __init__(self, cf_weight=DEFAULT_CF_WEIGHT):
         self.cf_weight = cf_weight
         self.cb_weight = 1 - cf_weight
 
-    def fit(self, ratings_df, movies_df):
-        # Train SVD
-        self.svd = train_svd(ratings_df)
+    def fit(self, ratings_df, movies_df, svd_model=None, cb_model=None):
+        """Train or reuse pre-trained models.
 
-        # Train Content-Based
-        self.cb = ContentBasedModel().fit(movies_df)
+        Args:
+            ratings_df: Ratings DataFrame
+            movies_df: Movies DataFrame
+            svd_model: Pre-trained SVD model (optional, will train if None)
+            cb_model: Pre-trained ContentBasedModel (optional, will train if None)
+        """
+        self.svd = svd_model if svd_model is not None else train_svd(ratings_df)
+        self.cb = cb_model if cb_model is not None else ContentBasedModel().fit(movies_df)
+
+        # Pre-compute full cosine similarity matrix for vectorized scoring
+        self.cosine_sim = cosine_similarity(self.cb.tfidf_matrix)
 
         self.ratings = ratings_df
         self.movies = movies_df
         return self
 
     def recommend(self, user_id, top_n=10):
-        """Gợi phim cho user bằng Hybrid."""
+        """Gợi phim cho user bằng Hybrid (SVD + Content-Based cosine similarity)."""
         user_movies = self.ratings[
             self.ratings["userId"] == user_id]["movieId"].values
         all_movies = self.ratings["movieId"].unique()
         unseen = [m for m in all_movies if m not in user_movies]
 
+        user_ratings = self.ratings[self.ratings["userId"] == user_id]
+        top_rated = user_ratings.nlargest(5, "rating")
+
+        # Pre-compute reference indices and weights for vectorized CB scoring
+        ref_indices = []
+        ref_weights = []
+        for _, row in top_rated.iterrows():
+            mid = row["movieId"]
+            if mid in self.cb.movie_idx.index:
+                ref_indices.append(self.cb.movie_idx[mid])
+                ref_weights.append(row["rating"])
+
         hybrid_scores = {}
         for movie_id in unseen:
             svd_pred = self.svd.predict(user_id, movie_id).est
-            # Normalized CB score (simplified)
-            cb_score = 3.0
+
+            # Vectorized content score using pre-computed similarity matrix
+            cb_score = 0.0
+            if ref_indices and movie_id in self.cb.movie_idx.index:
+                cand_idx = self.cb.movie_idx[movie_id]
+                sims = self.cosine_sim[cand_idx, ref_indices]
+                cb_score = np.dot(sims, ref_weights) / len(ref_indices)
+            else:
+                cb_score = 3.0
+
             hybrid_scores[movie_id] = (
                 self.cf_weight * svd_pred +
                 self.cb_weight * cb_score

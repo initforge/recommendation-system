@@ -253,4 +253,4 @@ plt.show()
 ---
 
 ## Bài tiếp theo
-[Các loại thuật toán Recommender System](03-cac-loai-thuat-toan.md)
+[Các loại thuật toán Recommender System](./03-thuat-toan.md)

@@ -107,4 +107,4 @@ Bạn thích Phim A → Hệ thống tìm phim có đặc điểm TƯƠNG TỰ
 ---
 
 ## Bài tiếp theo
-[Tại sao chọn phim & dataset MovieLens](02-tai-sao-chon-phim.md)
+[Tại sao chọn phim & dataset MovieLens](./02-tai-sao-chon-phim.md)

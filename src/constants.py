@@ -1,13 +1,15 @@
 # src/constants.py
 """Constants và cấu hình mặc định cho toàn bộ project."""
+from pathlib import Path
 
 # ============================================================
 # PATHS
 # ============================================================
-DATA_DIR = "data/raw/ml-1m"
-RESULTS_DIR = "results"
-CHARTS_DIR = "results/charts"
-REPORTS_DIR = "results/reports"
+# Absolute path relative to this file — works regardless of CWD
+DATA_DIR = Path(__file__).parent.parent / "data" / "raw" / "ml-1m"
+RESULTS_DIR = Path(__file__).parent.parent / "results"
+CHARTS_DIR = RESULTS_DIR / "charts"
+REPORTS_DIR = RESULTS_DIR / "reports"
 
 # ============================================================
 # DATASET
@@ -19,7 +21,7 @@ USERS_COLUMNS = ["userId", "gender", "age", "occupation", "zipcode"]
 # ============================================================
 # MODEL CONFIG
 # ============================================================
-DEFAULT_K = 20               # Số neighbors cho KNN
+DEFAULT_K = 40               # Số neighbors cho KNN (thống nhất với notebooks)
 MIN_RATINGS_FOR_CF = 5     # Tối thiểu ratings để dùng CF
 DEFAULT_SVD_FACTORS = 50    # Số latent factors cho SVD
 DEFAULT_N_EPOCHS = 20       # Số lần train SVD

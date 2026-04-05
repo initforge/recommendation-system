@@ -9,39 +9,36 @@ recommend-system/                      ← Thư mục gốc
 │
 ├── 📁 docs/                          ← Tài liệu (đọc hiểu)
 │   ├── 00-README.md                 ← Mục lục
-│   ├── 01-gioi-thieu.md            ← Recommender System là gì
-│   ├── 02-tai-sao-chon-phim.md     ← Tại sao phim + Dataset
-│   ├── 02b-chi-tiet-dataset.md     ← Chi tiết dataset
-│   ├── 03-thuat-toan.md             ← 5 thuật toán + code mẫu
-│   ├── 04-evaluation-metrics.md      ← RMSE, Precision, Recall
+│   ├── 01-gioi-thieu.md             ← Recommender System là gì
+│   ├── 02-tai-sao-chon-phim.md      ← Tại sao phim + Dataset
+│   ├── 02b-chi-tiet-dataset.md      ← Chi tiết dataset
+│   ├── 03-thuat-toan.md              ← 5 thuật toán + code mẫu
+│   ├── 04-danh-gia-metrics.md       ← RMSE, Precision, Recall, MAP, NDCG
 │   ├── 05-context-features.md        ← Temporal + Demographics
-│   ├── 06-project-structure.md        ← Cấu trúc này
+│   ├── 06-project-structure.md       ← Cấu trúc này
 │   └── 07-implementation-roadmap.md ← Lộ trình code
 │
 ├── 📁 notebooks/                    ← Google Colab Notebooks
-│   ├── 01_setup_eda.ipynb          ← Setup + EDA + Visualize
-│   ├── 02_user_cf.ipynb            ← User-Based CF
-│   ├── 03_item_cf.ipynb            ← Item-Based CF
-│   ├── 04_svd.ipynb                ← SVD (Matrix Factorization)
-│   ├── 05_content_based.ipynb       ← Content-Based Filtering
-│   ├── 06_hybrid.ipynb             ← Hybrid System
-│   └── 07_context_analysis.ipynb    ← Temporal + Demographics
+│   ├── 01_setup_eda.ipynb           ← Setup + EDA + Visualize
+│   ├── 02_user_cf.ipynb             ← User-Based CF
+│   ├── 03_item_cf.ipynb             ← Item-Based CF
+│   ├── 04_svd.ipynb                 ← SVD (Matrix Factorization)
+│   ├── 05_content_based.ipynb        ← Content-Based Filtering
+│   ├── 06_hybrid.ipynb              ← Hybrid System
+│   ├── 07_context_features.ipynb     ← Temporal + Demographics
+│   ├── 08_evaluation.ipynb          ← So sánh + export CSV
+│   └── 00_full_pipeline.ipynb        ← CHẠY NAY: toàn bộ → export JSON
 │
-├── 📁 web_demo/                     ← Streamlit Web App
-│   ├── app.py                      ← Entry point
-│   ├── models.py                   ← 5 algorithms (gộp 1 file)
-│   ├── data_loader.py              ← Load data
-│   ├── requirements.txt
-│   └── pages/
-│       ├── home.py
-│       ├── recommend.py
-│       └── evaluate.py
+├── 📁 frontend/                     ← Web Demo (HTML/CSS/JS) trên Cloudflare Pages
+│   ├── index.html                   ← Giao diện tĩnh tâm (Zen UX)
+│   └── app.js                       ← JavaScript kết nối ngrok API Backend
 │
 ├── 📁 src/                          ← Python modules (shared)
+│   ├── __init__.py                  ← Import helpers
 │   ├── constants.py                 ← Config, paths
-│   ├── data_loader.py              ← Load data
+│   ├── data_loader.py              ← Load MovieLens 1M
 │   ├── models.py                  ← 5 algorithms
-│   ├── evaluation.py               ← Metrics
+│   ├── evaluation.py               ← RMSE, MAE, MAP, NDCG, Precision@K, Recall@K
 │   └── context.py                 ← Temporal + Demographics
 │
 ├── 📁 data/
@@ -49,17 +46,23 @@ recommend-system/                      ← Thư mục gốc
 │   │   ├── ratings.dat
 │   │   ├── movies.dat
 │   │   └── users.dat
-│   └── processed/                  ← Cache
+│   └── processed/                  ← Cleaned data (notebook 01 tạo)
 │
 ├── 📁 results/
-│   ├── charts/                    ← Biểu đồ output
-│   └── reports/                    ← Báo cáo
+│   ├── charts/                    ← Biểu đồ PNG
+│   └── reports/                    ← Kết quả JSON (từ notebook export)
+│        ├── eda_stats.json
+│        ├── rmse_summary.json
+│        ├── evaluation_results.json
+│        ├── context_analysis.json
+│        └── final_evaluation.csv
 │
 ├── 📁 slides/                     ← Slide trình bày
 │   └── notes.md
 │
 ├── requirements.txt
-└── config.yaml
+├── README.md
+└── DEPLOY.md
 ```
 
 ---
@@ -431,15 +434,17 @@ Mỗi notebook = 1 bước, có thể chạy độc lập
 
 ```
 src/ gồm 5 files:
-├── constants.py      (~50 dòng) — Config
-├── data_loader.py   (~80 dòng) — Load data
-├── models.py        (~200 dòng) — 5 algorithms
-├── evaluation.py    (~80 dòng) — Metrics
-└── context.py      (~100 dòng) — Context analysis
-= ~510 dòng total
+├── __init__.py       (~5 dòng) — Import helpers
+├── constants.py      (~50 dòng) — Config, paths, defaults
+├── data_loader.py    (~80 dòng) — Load MovieLens 1M
+├── models.py        (~230 dòng) — 5 algorithms (Hybrid dùng cosine thật)
+├── evaluation.py    (~130 dòng) — RMSE, MAE, MAP@K, NDCG@K, Precision@K, Recall@K
+└── context.py      (~170 dòng) — Temporal + Demographics
+= ~620 dòng total
 
-notebooks/ gồm 7 files:
-→ 1 file = 1 step
-→ Chạy tuần tự 01 → 07
+notebooks/ gồm 9 files:
+→ 1 notebook = 1 step riêng
+→ notebooks 01–08: chạy riêng lẻ để học
+→ notebooks/00_full_pipeline.ipynb: CHẠY CÂY NÀY → export JSON cho web
 → Mỗi file có code + kết quả + chart
 ```

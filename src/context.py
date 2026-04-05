@@ -1,30 +1,11 @@
-# src/context.py
 """Context features: Temporal + Demographics analysis."""
 import pandas as pd
+from .data_loader import get_demographics_features
 
 
 # ============================================================
 # TEMPORAL ANALYSIS
 # ============================================================
-def get_temporal_features(ratings_df):
-    """
-    Trích xuất temporal features từ timestamp.
-
-    Args:
-        ratings_df: DataFrame với column 'timestamp'
-
-    Returns:
-        DataFrame với thêm columns: datetime, year, month, dayofweek, hour
-    """
-    df = ratings_df.copy()
-    df["datetime"] = pd.to_datetime(df["timestamp"], unit="s")
-    df["year"] = df["datetime"].dt.year
-    df["month"] = df["datetime"].dt.month
-    df["dayofweek"] = df["datetime"].dt.dayofweek
-    df["hour"] = df["datetime"].dt.hour
-    return df
-
-
 def rating_by_year(ratings_with_temporal):
     """Rating trung bình theo năm."""
     return ratings_with_temporal.groupby("year")["rating"].agg(["mean", "count", "std"])
@@ -68,14 +49,6 @@ OCCUPATION_MAP = {
 }
 
 
-def get_demographics_features(users_df):
-    """Map demographics codes thành labels."""
-    df = users_df.copy()
-    df["age_group"] = df["age"].map(AGE_MAP)
-    df["occupation_name"] = df["occupation"].map(OCCUPATION_MAP)
-    return df
-
-
 def rating_by_gender(ratings_df, users_df):
     """Rating trung bình theo giới tính."""
     merged = ratings_df.merge(users_df[["userId", "gender"]], on="userId")
@@ -115,11 +88,13 @@ def genre_preference_by_gender(ratings_df, movies_df, users_df):
     Returns:
         DataFrame: genre, male_avg, female_avg, diff
     """
-    # Merge all
     users_with_gender = users_df[["userId", "gender"]].copy()
     movies_with_genres = add_genre_flags(movies_df)
     merged = ratings_df.merge(users_with_gender, on="userId")
-    merged = merged.merge(movies_with_genres[["movieId"] + [f"is_{g}" for g in ALL_GENRES]], on="movieId")
+    merged = merged.merge(
+        movies_with_genres[["movieId"] + [f"is_{g}" for g in ALL_GENRES]],
+        on="movieId"
+    )
 
     results = []
     for genre in ALL_GENRES:
@@ -147,7 +122,10 @@ def genre_preference_by_age(ratings_df, movies_df, users_df):
     users_with_age = get_demographics_features(users_df)
     movies_with_genres = add_genre_flags(movies_df)
     merged = ratings_df.merge(users_with_age[["userId", "age_group"]], on="userId")
-    merged = merged.merge(movies_with_genres[["movieId"] + [f"is_{g}" for g in ALL_GENRES]], on="movieId")
+    merged = merged.merge(
+        movies_with_genres[["movieId"] + [f"is_{g}" for g in ALL_GENRES]],
+        on="movieId"
+    )
 
     results = {}
     for age_grp in users_with_age["age_group"].unique():

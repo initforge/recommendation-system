@@ -451,4 +451,4 @@ CHIA DATA:
 ---
 
 ## Bài tiếp theo
-[Knowledge-Based & Hybrid Systems](05-knowledge-hybrid.md)
+[Context Features — Temporal & Demographics Analysis](../docs/05-context-features.md)

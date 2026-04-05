@@ -1,348 +1,66 @@
-# 🎬 Slide Notes — Recommender System Presentation
+# 🎬 Slide Notes — Hướng Dẫn Trình Bày Recommender System
 
-## Cấu trúc Presentation
-
-```
-Presentation gồm 12 slides, mỗi slide ~2 phút nói
-Tổng thời gian: ~25 phút
-```
+> **Mục tiêu của tài liệu:** Document này không chỉ là kịch bản thuyết trình, mà còn mang tính giảng giải, dẫn dắt từng yếu tố. Bạn sẽ dùng tài liệu này để giải thích cho người nghe (hoặc giám khảo) hiểu được TẠI SAO chúng ta làm thế này, CODE đằng sau hoạt động ra sao, và THUẬT TOÁN tính toán những gì.
 
 ---
 
-## SLIDE 1: GIỚI THIỆU — Recommender System là gì?
+## 1. MỞ ĐẦU: VẤN ĐỀ VÀ GIẢI PHÁP (Slide 1-2)
 
-**Nội dung:**
-- Recommender System = Hệ thống gợi ý
-- Bài toán: "Quá nhiều lựa chọn" → cần gợi đúng thứ cho đúng người
+**Dẫn dắt:**
+"Chào mọi người. Khi chúng ta mở Netflix hay Spotify, làm sao phần mềm biết chúng ta muốn xem gì giữa hàng triệu lựa chọn? Đó là nhờ **Recommender System** (Hệ thống gợi ý). Hôm nay, mình sẽ trình bày cách xây dựng một hệ thống như vậy từ con số 0."
 
-**Ví dụ thực tế:**
-- Netflix: "Because you watched X..."
-- YouTube: "Up next"
-- Spotify: "Discover Weekly"
-- Amazon: "Frequently bought together"
-- TikTok: For You Page
-
-**Tại sao quan trọng?**
-- 80% what people watch on Netflix comes from recommendations
-- 35% of Amazon purchases come from recommendations
-- Netflix saves $1B/year from reduced churn due to recommendations
-
-**Nói:**
-> "Mỗi khi bạn xem Netflix, có AI chọn phim cho bạn. Đó chính là Recommender System."
+**Giải thích Data (MovieLens):**
+"Để làm được việc này, chúng ta cần Data. Dự án sử dụng tập dữ liệu **MovieLens 1M** (1 triệu đánh giá, 6040 người dùng, 3706 bộ phim).
+- Tại sao chọn MovieLens? Vì nó là 'tiêu chuẩn vàng' trong nghiên cứu AI cho Recommender System.
+- Trong thực tế, dữ liệu này là một **Ma trận Điểm số (Rating Matrix)**. Hàng là Người dùng, Cột là Phim. Tuy nhiên, 95.5% ô trong ma trận này bị trống (Sparsity) vì không ai có thể xem hết 3700 bộ phim. Bài toán của AI là: **Điền vào các ô trống đó!**"
 
 ---
 
-## SLIDE 2: TẠI SAO CHỌN PHIM? DATASET MOVIELENS
+## 2. GIẢI MÃ CÁC THUẬT TOÁN (Slide 3-8)
 
-**Nội dung:**
-- MovieLens 1M: 1 triệu ratings, 6,040 users, 3,706 phim
-- Thuộc GroupLens Research (University of Minnesota)
-- Classic dataset cho Recommender Systems research
-- Đủ lớn để demo, đủ nhỏ để chạy nhanh
+**Dẫn dắt:**
+"Làm sao để đoán được điểm số cho các ô trống? Dự án của chúng ta đã code và thử nghiệm 4 thuật toán khác nhau."
 
-**Dataset structure:**
-```
-ratings.dat   :: 1M ratings (userId::movieId::rating::timestamp)
-movies.dat    :: 3.8K movies (movieId::title::genres)
-users.dat     :: 6K users (userId::gender::age::occupation)
-```
+### A. Collaborative Filtering (User-Based & Item-Based)
+- **Giải thích Logic:** "Thuật toán này hoạt động dựa trên nguyên lý 'Hành vi đám đông'. Nếu User A thích phim X, Y, Z và User B cũng thích phim X, Y, thì khả năng cao B cũng sẽ thích Z. Hoặc ngược lại, nếu Hành động X và Hành động Y thường được xem cùng nhau, chúng ta gán chúng là tương đồng (Item-Based)."
+- **Giải thích Code:** "Trong code (notebook `02_user_cf.ipynb`), chúng ta dùng thuật toán `KNNBasic` từ thư viện `Surprise`. Nó tính toán **Cosine Similarity** (độ tương đồng Cosine) giữa các vector người dùng để tìm ra 'Cụm láng giềng' gần nhất."
 
-**Phân bố rating:**
-- Rating 4★ chiếm nhiều nhất (có thiên lệch positive)
-- Sparsity = 95.5% (ma trận rating gần như trống)
+### B. Matrix Factorization (SVD)
+- **Giải thích Logic:** "Đây là thuật toán từng giành chiến thắng giải Netflix 1 triệu đô. Nó không dựa vào bề mặt, mà đi sâu tìm **'Latent Factors' (Các nhân tố ẩn)**. Ví dụ: Máy tính không biết thể loại 'Hành động', nhưng nó tự tìm ra một trục toán học mà phim Die Hard và Terminator nằm rất gần nhau."
+- **Giải thích Code:** "Chúng ta dùng model SVD. Code chia ma trận khổng lồ ra làm 2 ma trận nhỏ (Ma trận User-Feature và Ma trận Movie-Feature). Khi nhân 2 ma trận này lại, ta ra được điểm số dự đoán rất chính xác cho mọi ô trống."
 
-**Nói:**
-> "MovieLens giống như 'Hello World' của Recommender Systems. Đủ đơn giản để hiểu, đủ phức tạp để nghiên cứu."
+### C. Content-Based (Lọc theo Nội dung)
+- **Giải thích Logic:** "Thay vì nhìn vào người khác, thuật toán này nhìn trực tiếp vào BỘ PHIM. Giống như: Bạn thích phim 'Hành Động, Viễn Tưởng', máy sẽ lôi từ kho ra các phim có đúng nhãn 'Hành Động, Viễn Tưởng'."
+- **Giải thích Code:** "Trong `05_content_based.ipynb`, chúng ta áp dụng NLP cơ bản: sử dụng `TfidfVectorizer` để phân tích các Text thể loại (genres) thành các ma trận số học, sau đó tính khoảng cách vector để tìm phim giống nhau."
 
----
-
-## SLIDE 3: OVERVIEW — 5 THUẬT TOÁN
-
-**Nội dung:**
-```
-1. User-Based CF  — Tìm user giống nhau → Gợi
-2. Item-Based CF   — Tìm phim giống nhau → Gợi
-3. SVD            — Matrix Factorization → Tìm latent factors
-4. Content-Based  — TF-IDF + Genres → Gợi phim tương tự
-5. Hybrid         — Kết hợp SVD + Content → Gợi tốt nhất
-```
-
-**Sơ đồ:**
-```
-┌──────────┐    ┌──────────┐    ┌──────────┐
-│  Users   │───▶│ Ratings  │◀───│  Movies  │
-└──────────┘    └────┬─────┘    └──────────┘
-                    │
-       ┌────────────┼────────────┐
-       ▼            ▼            ▼
-  User-Based   Matrix Factor.  Content-Based
-  CF           (SVD)           (Genres)
-       │            │            │
-       └────────────┼────────────┘
-                    ▼
-              HYBRID (Kết hợp)
-```
+### D. Hybrid Blend (Trí Tuệ Lai) - *Lõi Đề Xuất Cuối Cùng*
+- **Giải thích:** "Tại sao phải bầu chọn 1? Chúng ta gộp lại! SVD thì dự đoán rating giỏi, Content-Based thì bù đắp được khi người dùng quá mới (Cold-start). Lõi hệ thống (`src/models.py`) thực hiện thao tác cộng trọng số: 
+  `ĐIỂM_CHUNG = (0.6 * ĐIỂM_SVD) + (0.4 * ĐIỂM_CONTENT)`"
 
 ---
 
-## SLIDE 4: COLLABORATIVE FILTERING — Ý TƯỞNG
+## 3. GIẢI THÍCH KIẾN TRÚC HỆ THỐNG (Backend & Frontend)
 
-**Nội dung:**
-> "Người dùng giống nhau sẽ thích phim giống nhau"
+**Dẫn dắt:**
+"Một mô hình AI nằm trong Jupyter Notebook thì chưa thể gọi là sản phẩm. Chúng ta đã tách hệ thống làm 2 mảng cực kì độc lập (Decoupled Architecture), bám sát thực tế chuẩn doanh nghiệp."
 
-**Cách hoạt động:**
-1. Tính similarity giữa các users (cosine similarity)
-2. Chọn K users giống A nhất (K-Nearest Neighbors)
-3. Dự đoán rating của A cho phim i dựa trên K neighbors
+### A. Phía Backend (Bộ Não)
+- "Nằm toàn bộ trên **Google Colab** để tận dụng RAM và năng lực tính toán miễn phí.
+- Thay vì xuất File CSV, chúng ta dựng thẳng một máy chủ **FastAPI** ngay trong Colab (`00_full_pipeline.ipynb`).
+- Hàm `recommend` bằng Python nhận tham số `User_ID`, Load mô hình SVD đã train, tính toán điểm số và gói gọn toàn bộ kết quả vào chuẩn JSON.
+- Dùng `ngrok` để tạo một đường hầm (tunnel), thông ống từ máy chủ Colab xuất ra mạng Internet toàn cầu."
 
-**Ví dụ:**
-```
-User A thích: Phim X, Y, Z
-User B giống A nhất và thích: Phim W
-
-→ Gợi: Phim W cho User A (vì B giống A)
-```
-
-**Điểm mạnh:** Không cần hiểu nội dung phim
-**Điểm yếu:** Cold-start problem (user mới = không có data)
+### B. Phía Frontend (Giao Diện)
+- "Chúng ta dùng **Cloudflare Pages** hosting tĩnh hoàn toàn miễn phí, kiến trúc serverless với giao diện thiết kế theo phong cách Zen (Tĩnh Tâm), UI mộc mạc tối giản.
+- Bằng HTML/Tailwind và JS thuần (`app.js`), chúng ta lập trình luồng gọi lệnh `fetch()` đến API ngrok.
+- Giao diện không có Fake Image để chèo lái, mà chỉ hiện trung thực kết quả phân tích dữ liệu: **Tên phim và Điểm số dự đoán AI (Score)**. Chữ càng rõ, điểm AI trả về càng nổi bật, chứng tỏ độ sâu của thuật toán tính toán!"
 
 ---
 
-## SLIDE 5: USER-BASED vs ITEM-BASED CF
-
-**So sánh:**
-
-| | User-Based | Item-Based |
-|---|---|---|
-| Similarity | Giữa users | Giữa items (phim) |
-| Tốc độ | Chậm (6K users) | Nhanh hơn (3.7K movies) |
-| Ổn định | Users thay đổi | Items ít thay đổi |
-| RMSE | ~0.89 | ~0.88 |
-
-**Công thức User-Based:**
-```
-r̂(u,i) = r̄_u + Σ(sim(u,v) × (r_v,i - r̄_v)) / Σ|sim(u,v)|
-```
-
-**Công thức Item-Based:**
-```
-r̂(u,i) = Σ(sim(i,j) × r(u,j)) / Σ|sim(i,j)|
-```
-
-**Nói:**
-> "Item-Based thường được ưa chuộng hơn vì items ổn định, tính toán nhanh hơn."
+## 4. TỔNG KẾT VÀ DEMO
+- **Mời Trải nghiệm:** "Mời ban giám khảo/khán giả truy cập đường link Cloudflare tĩnh của chúng ta (`https://movie-recsys.pages.dev`). Sau khi điền địa chỉ API do Google Colab cung cấp sáng nay, chúng ta input thử User ID `10` và chọn thuật toán Hybrid."
+- **Giải thích Kết quả Demo:** "Như mọi người thấy, hệ thống KHÔNG hề trả về một danh sách cứng ngắc, mà nó đang gọi trực tiếp tới Colab. Colab nhận lệnh, model SVD tính toán nội suy với hàng ngàn phim, và trả về top 10 kèm mức điểm dự đoán (AI Score: ví dụ 4.25). 4.25 nghĩa là AI tự tin dự đoán User 10 sẽ rate phim này 4.25/5 sao!"
 
 ---
 
-## SLIDE 6: SVD — MATRIX FACTORIZATION
-
-**Nội dung:**
-> "Tìm 'đặc điểm ẩn' của users và movies"
-
-**Ý tưởng:**
-- Ma trận Ratings (users × movies) rất thưa
-- Phân rã thành: R ≈ U × S × Vᵀ
-- U = user factors (đặc điểm ẩn của user)
-- V = item factors (đặc điểm ẩn của phim)
-
-**Ví dụ latent factors:**
-```
-Factor 1: Hành động ◀──────────▶ Hài kịch
-Factor 2: Phim cũ    ◀──────────▶ Phim mới
-Factor 3: Phim Mỹ    ◀──────────▶ Phim nhập khẩu
-```
-
-**Công thức:**
-```
-r̂(u,i) = μ + b_u + b_i + p_u · q_i
-  μ  = rating trung bình
-  b_u = user bias
-  b_i = item bias
-  p_u·q_i = dot product của user & item vectors
-```
-
-**SVD đạt RMSE thấp nhất (~0.87)** — là thuật toán chiến thắng Netflix Prize 2009
-
----
-
-## SLIDE 7: CONTENT-BASED FILTERING
-
-**Nội dung:**
-> "Gợi phim dựa trên ĐẶC ĐIỂM phim, không cần user data"
-
-**Cách hoạt động:**
-1. Trích xuất features từ phim (genres)
-2. TF-IDF: chuyển genres thành vector
-3. Cosine similarity: tìm phim tương tự
-4. Gợi phim giống phim user đã thích
-
-**TF-IDF giải thích:**
-```
-TF-IDF(genre) = TF(genre) × IDF(genre)
-TF = tần suất genre trong phim
-IDF = giảm trọng số genre phổ biến (Comedy)
-```
-
-**Ưu điểm:**
-- ✅ Không cần data từ user khác
-- ✅ Gợi phim mới (cold-start item)
-- ✅ Explained được ("vì bạn thích X")
-
-**Nhược điểm:**
-- ❌ Thiếu diversity (chỉ gợi phim tương tự)
-- ❌ Cần features tốt
-
----
-
-## SLIDE 8: HYBRID RECOMMENDER
-
-**Nội dung:**
-> "Tận dụng ưu điểm của cả CF và Content-Based"
-
-**Công thức:**
-```
-Hybrid_Score(u,i) = α × SVD_Score(u,i) + (1-α) × Content_Score(u,i)
-  α = 0.6 → 60% SVD, 40% Content
-```
-
-**Tại sao Hybrid tốt?**
-- SVD: Giỏi khi user có nhiều ratings
-- Content: Giỏi khi user mới (cold-start)
-- Hybrid: Tận dụng cả hai
-
-**α tối ưu:** 0.6–0.7 (cross-validation cho thấy)
-
-**Kết quả:**
-- Hybrid đạt RMSE thấp nhất (~0.86)
-- MAP@10 cao hơn tất cả các thuật toán riêng lẻ
-
----
-
-## SLIDE 9: EVALUATION METRICS
-
-**Accuracy Metrics:**
-```
-RMSE = √(Σ(predicted - actual)² / N)
-MAE  = Σ|predicted - actual| / N
-```
-- RMSE nhạy hơn với large errors
-- Cả hai: thấp hơn = tốt hơn
-
-**Ranking Metrics:**
-```
-Precision@K = |relevant ∩ top-K| / K
-Recall@K    = |relevant ∩ top-K| / |relevant|
-MAP@K       = trung bình của AP@K (có tính thứ tự)
-```
-
-**Precision vs Recall:**
-- Precision: "Trong K gợi ý, bao nhiêu đúng?"
-- Recall: "Gợi được bao nhiêu % trong tổng?"
-
-**Chọn K phù hợp:**
-- K=5: Gợi ngắn, precision cao
-- K=10: Cân bằng (thường dùng)
-- K=20: Gợi dài, recall cao
-
----
-
-## SLIDE 10: CONTEXT FEATURES — TEMPORAL
-
-**Temporal Features:**
-- Year: Rating thay đổi theo năm
-- Day of week: Cuối tuần vs ngày thường
-- Hour: Giờ trong ngày
-
-**Insights:**
-```
-📅 Day of week:
-   Sat/Sun: Rating cao hơn ngày thường
-   (Cuối tuần có thời gian thư giãn hơn)
-
-⏰ Hour:
-   2-6h sáng: Rating cao nhất
-   (User ít, nhưng rating cẩn thận hơn)
-
-📆 Year:
-   1999-2000: Rating có xu hướng giảm nhẹ
-   (Dataset span: Nov 1999 – Feb 2000)
-```
-
-**Ứng dụng:**
-- Context-aware CF: weight ratings theo recency
-- Time-decay: đánh giá gần đây quan trọng hơn
-
----
-
-## SLIDE 11: CONTEXT FEATURES — DEMOGRAPHICS
-
-**Gender differences:**
-```
-♂ Male prefers:  Action, Sci-Fi, Thriller, War
-♀ Female prefers: Romance, Drama, Comedy, Documentary
-```
-
-**Age group insights:**
-```
-Under 18:  Rating cao nhất (enthusiastic)
-18-24:     Rating cao (main user group)
-25-34:     Moderate ratings
-45+:       Rating cẩn thận hơn, thích Drama
-```
-
-**Occupation:**
-- Students: Rating nhiều, thích Comedy/Action
-- Scientists/Engineers: Thích Sci-Fi, Documentary
-- Retired: Thích Drama, War
-
-**Ứng dụng:**
-- Demographic-aware recommendation
-- Bias gợi ý theo nhóm đối tượng
-- Personalized features cho từng nhóm
-
----
-
-## SLIDE 12: KẾT LUẬN & DEMO
-
-**Tổng kết kết quả:**
-
-| Thuật toán | RMSE | Đặc điểm |
-|-----------|------|-----------|
-| User-Based CF | ~0.89 | Tìm users giống nhau |
-| Item-Based CF | ~0.88 | Tìm phim giống nhau |
-| SVD | ~0.87 | ✅ Tốt nhất overall |
-| Content-Based | N/A | Gợi cold-start items |
-| Hybrid | ~0.86 | ✅ Tốt nhất khi kết hợp |
-
-**5 bài học quan trọng:**
-1. **SVD** thường tốt hơn CF truyền thống
-2. **Hybrid** kết hợp ưu điểm nhiều thuật toán
-3. **Context features** cải thiện hiểu biết về users
-4. **Metrics khác nhau** đo lường khía cạnh khác nhau
-5. **No free lunch** — không có thuật toán nào tốt cho mọi trường hợp
-
-**Demo live:**
-> Mở web app → nhập User ID → xem gợi ý
-
-**Link web app:** streamlit.cloud/deploy (hoặc chạy local)
-
----
-
-## CÁCH TRÌNH BÀY
-
-### Trước khi trình bày:
-- Test web demo trước 10 phút
-- Chuẩn bị dataset đã preprocessed
-- Backup: có sẵn screenshots của charts
-
-### Trong khi trình bày:
-- Bắt đầu bằng câu hỏi: "Ai đã từng xem Netflix?"
-- Dùng ví dụ cụ thể (User 1 thích phim gì → gợi phim gì)
-- Mỗi slide nói tối đa 2 phút
-- Q&A: chuẩn bị 3 câu hỏi phổ biến
-
-### Câu hỏi phỏng vấn có thể gặp:
-1. "Cold-start problem là gì?" → User/item mới không có data → Content-Based giải quyết
-2. "Tại sao SVD tốt hơn CF?" → Học latent features trực tiếp, không cần full similarity matrix
-3. "Hybrid làm gì khi user hoàn toàn mới?" → Fallback sang pure Content-Based
-4. "Zipcode có dùng không?" → Không, bị loại vì privacy và không có giá trị đủ lớn
+> **Note cho người trình bày:** Hãy nhớ, điểm ăn tiền nhất toàn bộ buổi thuyết trình là việc bạn giải thích rõ "Điểm dự đoán (Score) kia sinh ra từ đâu?" -> *Sinh ra từ việc nhân ma trận SVD kết hợp text nhãn Content-based, chứ không hề có sẵn trong CSDL.*
