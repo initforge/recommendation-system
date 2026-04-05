@@ -1,129 +1,159 @@
-# 🎬 Tài Liệu Phân Tích Kỹ Thuật Chuyên Sâu (Deep-Dive Notes)
+# 🎬 Tài Liệu Bóc Tách Code Căn Bản Đến Nâng Cao (File-by-File Walkthrough)
 
-> **Mục tiêu của tài liệu:** Đây không phải là slide trình bày thông thường, mà là tài liệu "Bóc tách mã nguồn" (Code Walkthrough). Bạn sẽ sử dụng file này để hiểu đến tận cùng từng dòng code quan trọng, từng cấu trúc file, lý do tại sao lại sử dụng thư viện đó, và cơ chế tính toán toán học đằng sau 5 thuật toán lõi.
-
----
-
-## 🏗️ 1. Giải phẫu Kiến trúc Hệ thống (Project Structure)
-
-Hệ thống được thiết kế theo chuẩn **Decoupled Architecture** (Tách rời hoàn toàn giao diện và hạ tầng tính toán).
-
-*   **`src/` (Source Code)**: Đây là trái tim của hệ thống. Chứa các file Python (`.py`) định nghĩa toàn bộ logic lõi. Mục đích của việc tách ra `src/` là tính tái sử dụng (Reusability). Thay vì viết code lặp lại rải rác trong nhiều file Notebook, ta gom nó vào `models.py` hoặc `data_loader.py` để mọi nơi đều có thể gọi `import src.models`.
-*   **`notebooks/`**: Chứa môi trường phòng thí nghiệm (Jupyter Notebook). File quan trọng nhất là `00_full_pipeline.ipynb` thực thi toàn bộ quy trình từ Load Model, Train Model đến việc dựng thẳng một Server API chạy ngầm trên Google Colab.
-*   **`frontend/`**: Chứa code giao diện. Được viết bằng HTML tĩnh, CSS (Tailwind) và thuần Javascript (`app.js`). Thư mục này được đẩy thẳng lên mạng phân phối nội dung (CDN) của Cloudflare Pages để người dùng load ngay lập tức trong 2 giây mà không cần Server render.
+Tài liệu này được thiết kế theo đúng tư duy tổ chức thư mục của lập trình viên. Chúng ta sẽ đi "quét" từ gốc lên ngọn, đọc từng file, hiểu từng dòng code và biết chính xác tại sao file đó lại tồn tại.
 
 ---
 
-## 📦 2. Giải phẫu Thư Viện (Dependencies)
+## 1. Môi trường & Thư viện (Dependencies)
 
-Tại sao lại phải `pip install` những thư viện này? Chúng đóng vai trò gì?
-
-1.  `scikit-surprise` (Surprise):
-    *   **Mục đích**: Thư viện Python sinh ra CHỈ để xây dựng Hệ thống Gợi ý (Recommender System).
-    *   **Áp dụng**: Nó cung cấp sẵn bộ Reader (đọc file ratings), Dataset builder, và cấu trúc thuật toán `KNNWithMeans` cho Collaborative Filtering, thuật toán `SVD` cho Matrix Factorization. Nếu tự code từ đầu bằng Numpy sẽ mất hàng ngàn dòng code tốn kém bộ nhớ.
-2.  `scikit-learn` (Sklearn):
-    *   **Mục đích**: Chuyên gia về Học Máy cơ bản (Machine Learning).
-    *   **Áp dụng**: Không có hàm nào trong `surprise` xử lý text. Ta dùng `TfidfVectorizer` của sklearn để cân đo đong đếm Text Thể loại phim (Genres), và dùng `cosine_similarity` để tính góc nghiêng hình học giữa 2 bộ phim.
-3.  `fastapi` & `uvicorn`:
-    *   **Mục đích**: Viết API Server. Nhanh hơn, hiện đại hơn, và hỗ trợ bất đồng bộ (async/await) tốt hơn Flask rất nhiều. `uvicorn` đóng vai trò là "chiếc xe" chở ứng dụng FastAPI chạy trên mạng.
-4.  `pyngrok`:
-    *   **Mục đích**: Google Colab nằm sâu trong tường lửa của Google. `pyngrok` đào một đường hầm riêng (Tunneling), móc một đường dẫn cấp phát ngẫu nhiên (`xyz.ngrok-free.dev`) đâm xuyên dính thẳng vào Port `8000` nội bộ của Colab để Web ở nhà có thể giao tiếp được!
+Trước khi đi vào code, dự án này yêu cầu cài đặt các 'vũ khí' sau trong `requirements.txt`:
+*   **`scikit-surprise`**: Thư viện lõi sinh ra chỉ để làm Recommender System. Cung cấp sẵn các thuật toán nén ma trận (SVD) và láng giềng k-NN. Nó giúp tiết kiệm hàng nghìn dòng code so với việc tự viết bằng C/C++.
+*   **`scikit-learn` & `pandas`**: Dùng Pandas để gọt 1 triệu dòng dữ liệu `.dat` thành các bảng (Dataframes). Dùng `TfidfVectorizer` của Sklearn để máy tính hiểu được nhãn chữ ("Romance", "Action") thành dạng số học.
+*   **`fastapi` & `uvicorn`**: Dùng để mở một API Server. Nhanh hơn Flask, hỗ trợ Async xịn xò.
+*   **`pyngrok`**: Đóng vai trò làm đường hầm. Server Colab trên cloud của Google chặn mọi thứ từ bên ngoài. Ngrok đục 1 lỗ nối cổng IP nội bộ ra internet thành đường link `https://...ngrok-free.dev`.
 
 ---
 
-## 🧠 3. Giải Cứu Toán Học & Bóc Tách Code (Thuật Toán)
+## 2. Giải Phẫu Từng Thư Mục & File Code
 
-### A. Phương pháp K-Nearest Neighbors (Dùng cho User/Item-CF)
+### 2.1. Thư mục `src/` (Bộ não tái sử dụng)
+Thư mục này sinh ra để chứa các "Bản thiết kế" (.py). Code ở đây không tự chạy, mà để các Notebooks ở trên Colab gọi `import src` và xài.
 
-**Triết lý Toán học:** Đo khoảng cách "sở thích" giữa 2 người bằng độ đo `Cosine`. Thay vì đo đường chim bay (Euclidean) bị ảnh hưởng bởi việc người cho nhiều điểm người cho ít điểm, góc Cosine chiếu 2 người lên không gian vector. Góc càng hẹp (Cosine xấp xỉ 1) -> 2 người càng giống nhau.
+#### 📄 File `src/data_loader.py`
+**Chức năng:** Đi chợ mua nguyên liệu. Mở các file `.dat` thô ráp của MovieLens và tải vào bộ nhớ RAM.
+**Bóc tách Code:**
+```python
+def load_movielens():
+    # pd.read_csv: Lệnh huyền thoại của Pandas dùng để đọc file rác.
+    # sep="::": Quy định dữ liệu được cắt nhau bằng dấu :: chứ không phải dấu phẩy ,
+    # names=[...]: Nhãn dán cho các cột để dễ truy vấn sau này.
+    ratings = pd.read_csv("ml-1m/ratings.dat", sep="::", engine="python",
+                          names=["userId", "movieId", "rating", "timestamp"])
+    # ... load movies và users tương tự ...
+    return ratings, movies, users
+```
 
-**Bóc tách Syntax (Đoạn trích từ `models.py`):**
+#### 📄 File `src/models.py` (TRÁI TIM HỆ THỐNG)
+**Chức năng:** Nơi chứa định nghĩa toàn bộ 5 thuật toán Machine Learning.
+
+**1. Khối Code User & Item Collaborative Filtering (Lọc Cộng Tác)**
+*Yêu cầu:* Tìm "người giống người" (User) hoặc "phim giống phim" (Item).
 ```python
 def train_user_cf(ratings_df, k=20):
-    # Dòng 1: Định nghĩa thanh do (Thang điểm 1 đến 5 sao)
-    reader = Reader(rating_scale=(1, 5))
-    
-    # Dòng 2: Nạp DataFrame của Pandas vào cấu trúc C Matrix tối ưu của bộ thư viện Surprise
+    reader = Reader(rating_scale=(1, 5)) # Định nghĩa luật chơi: Điểm số chỉ chạy từ 1 đến 5 sao
     data = Dataset.load_from_df(ratings_df[["userId", "movieId", "rating"]], reader)
-    trainset = data.build_full_trainset()
+    trainset = data.build_full_trainset() # Chuyển bảng Excel thành chuẩn Ma Trận của Surprise
     
-    # Dòng 3 & 4: Khởi tạo mô hình KNN có hiệu chỉnh sai số trung bình (KNNWithMeans). 
-    # Mệnh lệnh: Tìm k=20 người láng giềng gần nhất, dùng độ đo là 'cosine'.
+    # KNNWithMeans: Thuật toán K-Nearest Neighbors nhưng có hiệu chỉnh điểm trung bình 
+    # (Tránh việc user A vốn khó tính toàn chấm 2 sao, user B xởi lởi toàn chấm 5 sao).
+    # sim_option={'name': 'cosine'}: Dùng Cosine để đo góc lệch giữa 2 User. Góc càng hẹp = càng thân nhau.
     model = KNNWithMeans(k=k, sim_option={"name": "cosine"})
-    model.fit(trainset) # Thực thi việc nhồi ma trận và học
+    model.fit(trainset) # Chạy thuật toán để tìm hàng xóm (Học)
     return model
 ```
 
-### B. Phương pháp Singular Value Decomposition (SVD)
-
-**Triết lý Toán học:** Trái tim của giải thưởng Netflix. Ma trận đánh giá ban đầu là ma trận R thưa thớt (Sparse - vì đa số chưa xem phim). Hệ thống cưỡng bức rã ma trận R thành `U \times V`. Trong đó `U` là ma trận Đặc Trưng Người Dùng (Latent Factors) và `V` là ma trận Đặc Trưng Phim. Các "Đặc trưng" (Factors) này là các con số vô hình có thể đại diện cho mức độ Hài Hước, Hành Động, Biệt Ly... Hệ thống tìm ra tối ưu số chiều bằng Gradient Descent.
-
-**Bóc tách Syntax:**
+**2. Khối Code SVD (Matrix Factorization)**
+*Yêu cầu:* Giải bài toán ma trận trống 95% bằng cách phân rã nó thành các Đặc tính (Latent Factors).
 ```python
 def train_svd(ratings_df, n_factors=50, n_epochs=20):
-    # Khởi tạo mô hình SVD. Tham số sống còn:
-    # n_factors = 50: Yêu cầu thuật toán phải cố tình nén toàn bộ thói quen sở thích của 6000 người 
-    #                 lỗ thủng thành đúng 50 trục đặc điểm Toán học.
-    # n_epochs = 20: Tự học 20 lần chạy qua lại tập data để tối thiểu hoá sai số (Gradient Descent).
+    # ... đoạn nạp data tương tự ở trên ...
+    
+    # SVD: Singular Value Decomposition (Thuật toán vô địch Netflix).
+    # n_factors=50: Ra lệnh cho máy nén sự phức tạp của 6000 người xuống trị giá 50 cái trục (VD: Trục hài hước, trục đẫm máu...)
+    # n_epochs=20: Quét qua lại tập dữ liệu 20 vòng (Gradient Descent) để tính tới khi sai số nhỏ nhất mới dừng.
     model = SVD(n_factors=n_factors, n_epochs=n_epochs, random_state=42)
     model.fit(trainset)
     return model
 ```
 
-### C. Phương pháp Content-Based Filtering (Phân tích cú pháp Text)
-
-**Triết lý Toán học:** User chưa thích bộ phim nào (Tân binh - Cold start)? CF và SVD mù màu. Giải pháp là TF-IDF: Tính toán tần số xuất hiện của một Thể Loại Phim (Ví dụ `Action`). Nếu Phim Marvel chứa chữ Action, Phim DC chứa chữ Action, chúng sẽ được gộp vào chung một cụm vector không gian.
-
-**Bóc tách Syntax:**
+**3. Khối Code Trí Tuệ Lai (Hybrid)**
+*Yêu cầu:* SVD thì mạnh nhưng không thể gợi ý cho User mới tò te (Cold-start). Content-Based thì bù đắp được nhưng kém sâu sắc. Ta gộp chúng lại.
 ```python
-class ContentBasedModel:
-    def fit(self, movies_df):
-        # Biến "Action|Adventure" thành "Action Adventure" cho máy hiểu đây là 2 chữ riêng
-        self.movies["genres_clean"] = self.movies["genres"].str.replace("|", " ", regex=False)
-        
-        # Dùng CountVectorizer bản nâng cấp (Tfidf), bỏ đi các từ vô nghĩa (stop_words='english')
-        self.tfidf = TfidfVectorizer(stop_words="english")
-        
-        # Dựng Ma trận Sparse chứa toàn điểm số của các từ vựng này.
-        self.tfidf_matrix = self.tfidf.fit_transform(self.movies["genres_clean"])
-        return self
-```
-
-### D. Phương pháp Trí Tuệ Lai (Hybrid Blend & Vectorized Scoring)
-
-**Triết lý Toán học:** Không để mất một giọt sức mạnh nào. Thuật toán là sự giao thoa: `Score_Cuối = (0.6 * Điểm Trí Tuệ của SVD) + (0.4 * Điểm Phân tích thể loại của CB)`.
-
-**Bóc tách Syntax Nâng Cao (Giải thích kỹ thuật Vectorized):**
-```python
-# Trong hàm get_recs_hybrid của file Colab
 def get_recs_hybrid(uid, cf_weight=0.6, top_n=50):
-    # ... (Trích xuất các bộ phim người dùng đã xem và top 5 phim yêu thích nhất) ...
-    
-    for mid in unseen: # Duyệt hàng ngàn phim chưa xem
-        # Giải mã Điểm số SVD (mức độ thiên vị CF là 60%)
-        svd_p = model_svd.predict(uid, mid).est  
-
-        cb_p = 3.0 # Default fallback nếu người dùng chưa có data (Cold Start)
+    # Lõi sức mạnh của hệ thống là công thức tính Điểm Tổng Phục (Scores)
+    for mid in unseen: # Vòng lặp quét duyệt qua tất cả các Phim mà User chưa xem
         
-        # [KINH ĐIỂN TỐI ƯU HIỆU SUẤT TRONG CODE]
-        # Thay vì Loop qua từng phim điểm danh từng vòng For (cực kì chậm chạp),
-        # Code sử dụng Cơ chế Numpy Vectorized (Tính toán song song bằng ngôn ngữ C ngầm dưới Python).
-        # Lấy ma trận Cosine đúc sẵn đụng ngay trực tiếp vào Mảng Array phim ứng cử (ref_indices).
+        # Phần 1: Gọi SVD ra mặt, yêu cầu dự đoán (.predict) người uid cho phim mid mấy điểm
+        svd_p = model_svd.predict(uid, mid).est  
+        
+        # Phần 2: Nội suy Vector
+        cb_p = 3.0 # Điểm mặc định nếu Content-Based tắt đài
         if len(ref_indices) > 0 and mid in movie_idx.index:
+            # np.dot: Tính Phép nhân vô hướng (Dot Product) của mảng Cosine và điểm đánh giá quá khứ. 
+            # Kỹ thuật Vectorized trên Numpy giúp code Python chạm mốc tốc độ của C++.
             sims = cosine_sim[movie_idx[mid], ref_indices]
-            cb_p = np.dot(sims, ref_weights) / len(ref_indices) # Lấy trung bình cộng (Dot product chia n)
+            cb_p = np.dot(sims, ref_weights) / len(ref_indices) 
             
-        # Tổng Hoà (Lõi của hệ thống)
+        # Tổng hợp: 60% tin SVD, 40% tin Content-Based
         scores[mid] = cf_weight * svd_p + (1 - cf_weight) * cb_p
 ```
 
 ---
 
-## 🚀 4. Đánh giá Cải Tiến & Hướng Mở Rộng Hệ Thống (Future Work)
+### 2.2. Thư mục `notebooks/` (Bộ vi xử lý trên Cloud)
 
-Dự án hiện tại giải quyết cực tốt bài toán bằng sức mạnh của **Đại số tuyến tính** và **Phân rã Ma trận**. Tuy nhiên, để đáp ứng hàng chục triệu người dùng thực tế, đây là những phần có thể cải tiến:
+Các file từ `01` đến `08` dùng để làm nháp từng bước. Nhưng ngôi sao sáng nhất là `00_full_pipeline.ipynb`. File này làm 2 nhiệm vụ cốt lõi:
 
-1. **Neural Collaborative Filtering (Deep Learning):** Recommender System hiện đại sử dụng Mạng Nơ ron (Nueral Networks, Embeddings nhiều tầng) để bắt được các Non-linear Behaviors (hành vi phi tuyến tính bí hiểm) thay vì chỉ sử dụng Dot Product (tuyến tính) như SVD.
-2. **Real-time Pipeline (Cấu trúc Stream):** Thay vì Load Full Ma Trận trên Colab (Vốn chậm và sẽ sụp nguồn nếu lên hàng tỷ ratings), hệ thống thật cần triển khai Apache Kafka kết hợp Redis để cập nhật tính toán Real-Time.
-3. **Implicit vs Explicit Data:** Hệ thống chúng ta đang lấy dữ liệu Explicit (Lấy Review số sao của người dùng). Trên thực tế 99% dữ liệu ngoài đời là Implicit (Lịch sử Click chuột, Thời gian Dừng màn hình, Mua hàng ảo). Ta có thể mở rộng mô hình ALS (Alternating Least Squares) trên dữ liệu ẩn này.
-4. **Deploy Cơ Sở Hạ Tầng Vật Lý:** Dời bỏ Google Colab + Ngrok. Bọc toàn bộ code Python qua một tầng `Docker Container` và Host vĩnh viễn trên Render.com hoặc Amazon AWS để sở hữu tên miền riêng rẻ nhưng mạnh.
+**Nhiệm vụ 1: Gọi toàn bộ thuât toán ở `src/` ra luyện tập cùng lúc.**
+`svd.fit(trainset)`
+Sau khi rèn luyện xong, nó xuất ra một file cứng bằng `joblib`. Đây là trò lưu 캐시 (Cache): lần tới chạy chỉ tốn 0.5 giây để bốc Models ra thay vì học 10 phút lại từ đầu.
+
+**Nhiệm vụ 2: Mở Cổng API Server (FastAPI)**
+File này quyết làm hệ thống chạy thực: 
+```python
+# Mở một cánh cổng tiếp tân API
+api = FastAPI(title='Movie Recommender API')
+
+# Định nghĩa tuyến đường (Route).
+# Khi Frontend đẩy data JSON lên đường dẫn /api/recommend, hàm này kích hoạt.
+@api.post('/api/recommend')
+def api_recommend(req: RecommendRequest):
+    # Phân tích xem Request đòi SVD hay Hybrid
+    if algo == 'Hybrid':
+        recs_with_scores = get_recs_hybrid(uid, req.cf_weight) # Chạy hàm Toán Học
+        
+    # Chuẩn bị dĩa thức ăn JSON trả về cho Frontend
+    results = []
+    for mid, score in recs_with_scores:
+        # Bốc tên phim, nhãn dán, và KÈM THEO ĐIỂM SỐ CHÍNH XÁC TỪNG SỐ THẬP PHÂN
+        results.append({'movieId': int(mid), 'title': row['title'], 'score': round(float(score), 2)})
+    return {'recommendations': results}
+```
+
+---
+
+### 2.3. Thư mục `frontend/` (Giao diện Tĩnh Tâm)
+
+Đây là tầng Giao Tiếp bọc ngoài bằng công nghệ cực nhẹ. Do API nằm hết trên Colab, Web sẽ được host ở Cloudflare Pages mà không sinh ra một xu chi phí vận hành Server.
+
+#### 📄 File `app.js` (Thị Giác & Cử Động)
+**Chức năng:** Trực tiếp bấm bụng gọi ngrok (Colab), sau đó đổ JSON ra thành cái List Đẹp đẽ trên màn hình.
+**Bóc tách Code:**
+```javascript
+// Bước 1: Fetch() lệnh thần thánh của JS để đi vay mượn data từ Server Khác
+const res = await fetch(`${API_URL}/api/recommend`, {
+    method: 'POST', // Đẩy ID của User lên
+    headers: {
+        'Content-Type': 'application/json',
+        // ngrok-skip-browser-warning: Dòng Code Cứu Rỗi! 
+        // Vì ngrok là máy chủ tạm nên nó hay quăng ra 1 cái trang cảnh báo HTML màu xanh le. 
+        // Header này báo ngrok hãy im mồm và cứ trả về JSON trong suốt cho Frontend.
+        'ngrok-skip-browser-warning': 'true' 
+    },
+    body: JSON.stringify({ user_id: userId, algorithm: algorithm, top_n: 10 })
+});
+
+const data = await res.json(); // Biến rác thành Vàng
+
+// Bước 2: Map Data vào Giao diện (Màu Sage Green)
+resultsGrid.innerHTML = data.recommendations.map((m, i) => {
+    // Nếu thuật toán có trả về con Score tâm huyết, thì in nó ra. Không thì để Dấu ?.
+    const score = m.score ? parseFloat(m.score).toFixed(2) : "?";
+    return `
+        <!-- Xây dựng cục HTML nhúng động biến "${m.title}" -->
+        <span class="text-sage">${score}</span>
+    `
+}).join(''); // Nối các mảnh HTML vào Khung Trắng
+```
+
+Đến đây, bạn đã thấu hiểu nguyên lý tận cùng của Project: **Data (MovieLens) -> Luyện Công (Surprise/Sklearn) -> Đóng kén Server (FastAPI + Ngrok) -> Trải Lên Giấy (Cloudflare JS)**. Mọi thứ được thiết kế chặt chẽ và không thể tách rời.
