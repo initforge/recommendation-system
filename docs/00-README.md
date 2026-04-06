@@ -70,15 +70,15 @@ recommend-system/
 
 ---
 
-## Lộ trình 10 tuần
+## Lộ trình 10 phase
 
 ```
-Tuần 1-2: Setup + EDA
-Tuần 3-4: User CF + Item CF
-Tuần 5:   SVD + Content-Based
-Tuần 6:   Hybrid
-Tuần 7:   Context Analysis
-Tuần 8:   Evaluation + So sánh
-Tuần 9:   Web Demo + Deploy
-Tuần 10:  Slide + Báo cáo + Trình bày
+Phase 1-2: Setup + EDA
+Phase 3-4: User CF + Item CF
+Phase 5:   SVD + Content-Based
+Phase 6:   Hybrid
+Phase 7:   Context Analysis
+Phase 8:   Evaluation + So sánh
+Phase 9:   Web Demo + Deploy
+Phase 10:  Báo cáo + Trình bày
 ```
