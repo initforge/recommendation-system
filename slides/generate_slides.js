@@ -69,24 +69,32 @@ function addContentSlide(title, points, imagePath, reverse = false) {
   // Title
   slide.addText(title, { x: 0.5, y: 0.3, w: 9, h: 0.8, fontSize: 32, bold: true, color: "0F172A", fontFace: "Helvetica" });
   
-  let textX = reverse ? 4.5 : 0.5;
-  let textW = imagePath ? 5.0 : 9.0;
-  let imgX = reverse ? 0.3 : 5.8;
+  let textX, textW, imgX, imgW, imgH, imgY;
   
-  // Add image inside a nice rounded rectangle illusion (since pptxgenjs doesn't support border-radius images directly, we use pure image)
-  if(imagePath) {
-    slide.addImage({ path: imagePath, x: imgX, y: 1.3, w: 3.8, h: 5.5, sizing: { type: "contain" } });
+  if (imagePath) {
+    textX = reverse ? 5.0 : 0.5;
+    textW = 4.5;
+    imgX = reverse ? 0.5 : 5.5;
+    imgW = 4.0;
+    imgH = 4.8;
+    imgY = 1.3;
+    slide.addImage({ path: imagePath, x: imgX, y: imgY, w: imgW, h: imgH, sizing: { type: "contain" } });
+  } else {
+    // If no image, center the text block and make it nicely padded
+    textX = 1.0;
+    textW = 8.0;
   }
   
   // Bullets
-  let bulletOptions = { bullet: { type: "character", character: "•" }, color: "334155", fontFace: "Helvetica", fontSize: 20, breakLine: true, paraSpaceAfter: 24 };
+  let bulletOptions = { bullet: { type: "character", character: "•" }, color: "334155", fontFace: "Helvetica", fontSize: 24, breakLine: true, paraSpaceAfter: 32, lineSpacing: 32 };
   
   let formattedPoints = points.map(p => {
-    if(p.startsWith("- ")) return { text: p.substring(2), options: { ...bulletOptions, indentLevel: 1, fontSize: 18, color: "64748B" } };
+    if(p.startsWith("- ")) return { text: p.substring(2), options: { ...bulletOptions, indentLevel: 1, fontSize: 20, color: "64748B", paraSpaceAfter: 20, lineSpacing: 28 } };
     return { text: p, options: bulletOptions };
   });
 
-  slide.addText(formattedPoints, { x: textX, y: 1.5, w: textW, h: 5.0, valign: "top" });
+  // Use valign: "middle" instead of "top" so text floats in the center vertically, balancing empty space.
+  slide.addText(formattedPoints, { x: textX, y: 1.5, w: textW, h: 5.0, valign: "middle" });
   return slide;
 }
 
@@ -167,11 +175,11 @@ let s8 = pres.addSlide({ masterName: "MASTER_VISUAL" });
 s8.addText("EDA Key Findings", { x: 0.5, y: 0.1, w: 9, h: 0.6, fontSize: 28, bold: true, color: "0F172A", fontFace: "Helvetica" });
 
 // Custom chart block
-s8.addShape(pres.ShapeType.rect, { x: 1, y: 1.5, w: 3.5, h: 4, fill: { color: "F8FAFC" }, line: { color: "CBD5E1", width: 1 } });
-s8.addText("Rating Distribution:\n\n4-Star is the most common (34%).\nUsers lean towards positive ratings.", { x: 1.2, y: 1.8, w: 3.1, h: 3, fontSize: 18, color: "0F172A" });
+s8.addShape(pres.ShapeType.rect, { x: 1, y: 1.5, w: 3.5, h: 4.5, fill: { color: "F8FAFC" }, line: { color: "CBD5E1", width: 1 } });
+s8.addText("Rating Distribution:\n\n4-Star is the most common (34%).\nUsers lean towards positive ratings.", { x: 1.2, y: 1.5, w: 3.1, h: 4.5, fontSize: 22, color: "0F172A", valign: "middle", lineSpacing: 32 });
 
-s8.addShape(pres.ShapeType.rect, { x: 5.5, y: 1.5, w: 3.5, h: 4, fill: { color: "F8FAFC" }, line: { color: "CBD5E1", width: 1 } });
-s8.addText("Long Tail Effect:\n\nTop 100 movies hold massive interaction volume.\nThousands of niche movies sit with <10 ratings.", { x: 5.7, y: 1.8, w: 3.1, h: 3, fontSize: 18, color: "0F172A" });
+s8.addShape(pres.ShapeType.rect, { x: 5.5, y: 1.5, w: 3.5, h: 4.5, fill: { color: "F8FAFC" }, line: { color: "CBD5E1", width: 1 } });
+s8.addText("Long Tail Effect:\n\nTop 100 movies hold massive interaction volume.\nThousands of niche movies sit with <10 ratings.", { x: 5.7, y: 1.5, w: 3.1, h: 4.5, fontSize: 22, color: "0F172A", valign: "middle", lineSpacing: 32 });
 
 
 // SPEAKER 2
@@ -257,7 +265,7 @@ let s16 = pres.addSlide({ masterName: "MASTER_STD" });
 s16.addText("Prediction Metrics: RMSE Focus", { x: 0.5, y: 0.3, w: 9, h: 0.8, fontSize: 32, bold: true, color: "0F172A", fontFace: "Helvetica" });
 
 s16.addShape(pres.ShapeType.roundRect, { x: 1, y: 1.5, w: 8, h: 2, fill: { color: "0EA5E9" }, line: { color: "0284C7", width: 1 }, rectRadius: 0.1 });
-s16.addText("SVD achieved RMSE = 0.87 (The lowest error)", { x: 1, y: 1.5, w: 8, h: 2, fontSize: 28, bold: true, color: "FFFFFF", align: "center" });
+s16.addText("SVD achieved RMSE = 0.87 (The lowest error)", { x: 1, y: 1.5, w: 8, h: 2, fontSize: 28, bold: true, color: "FFFFFF", align: "center", valign: "middle" });
 
 s16.addText([
   { text: "Comparison:\n", options: { bold: true } },
@@ -265,7 +273,7 @@ s16.addText([
   { text: "• Item-Based CF: 0.9293\n" },
   { text: "• SVD: 0.8706\n\n" },
   { text: "Root Mean Square Error heavily penalizes large mistakes, ensuring our system avoids making terrible movie recommendations." }
-], { x: 1, y: 4.0, w: 8, h: 2, fontSize: 20, color: "334155" });
+], { x: 1, y: 3.8, w: 8, h: 3, fontSize: 22, color: "334155", valign: "top", lineSpacing: 28 });
 
 // Slide 17
 addContentSlide("Ranking Metrics: Top-K Assessment", [
