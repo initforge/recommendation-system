@@ -12,7 +12,7 @@ function buildPart2(pptx) {
   const s12 = pptx.addSlide();
   addBg(s12, { slideNum: 12, section: 'Algorithms', accentColor: C.purple });
   addTitle(s12, 'Algorithm 3 — SVD (Matrix Factorization)');
-  addImageRight(s12, 'matrix_decomposition.png', { x: 8.0, y: 0.8, w: 4.8, h: 4.5 });
+  addImageRight(s12, 'img_08_svd.png', { x: 8.0, y: 0.8, w: 4.8, h: 4.5 });
   addBullets(s12, [
     'Problem: Rating matrix is 95.5% empty (sparse)',
     'Idea: Decompose R into P × Qᵀ (latent factors)',
@@ -36,7 +36,7 @@ function buildPart2(pptx) {
   const s13 = pptx.addSlide();
   addBg(s13, { slideNum: 13, section: 'Algorithms', accentColor: C.purple });
   addTitle(s13, 'Algorithm 4 — Content-Based Filtering');
-  addImageRight(s13, 'movie_tags_network.png', { x: 8.0, y: 0.8, w: 4.8, h: 4.5 });
+  addImageRight(s13, 'img_09_contentbased.png', { x: 8.0, y: 0.8, w: 4.8, h: 4.5 });
   addBullets(s13, [
     'Idea: "If you liked Action movies, try more Action"',
     'Based on movie CONTENT (genres), not on other users',
@@ -59,7 +59,7 @@ function buildPart2(pptx) {
   const s14 = pptx.addSlide();
   addBg(s14, { slideNum: 14, section: 'Algorithms', accentColor: C.purple });
   addTitle(s14, 'Algorithm 5 — Hybrid (SVD + Content-Based)');
-  addImageRight(s14, 'puzzle_pieces.png', { x: 8.5, y: 0.8, w: 4.3, h: 4.3 });
+  addImageRight(s14, 'img_10_hybrid.png', { x: 8.5, y: 0.8, w: 4.3, h: 4.3 });
   addBullets(s14, [
     'SVD: Accurate predictions, but has cold-start problem',
     'Content-Based: Handles cold-start, but limited diversity',
@@ -180,7 +180,7 @@ function buildPart2(pptx) {
   const s18 = pptx.addSlide();
   addBg(s18, { slideNum: 18, section: 'Context Features', accentColor: C.teal });
   addTitle(s18, 'Context Features — Temporal Analysis');
-  addImageRight(s18, 'clock_calendar_trends.png');
+  addImageRight(s18, 'img_11_temporal.png');
   addBullets(s18, [
     'Extract from timestamp: year, month, day, hour',
     'Key Findings:',
@@ -280,7 +280,7 @@ function buildPart2(pptx) {
   s22.background = { color: C.accent2 };
   s22.addShape('rect', { x: 0, y: 0, w: '100%', h: 0.14, fill: { color: C.golden } });
   s22.addShape('rect', { x: 0, y: SLIDE_H - 0.14, w: '100%', h: 0.14, fill: { color: C.golden } });
-  s22.addImage({ path: path.join(__dirname, 'images/rocket_launch.png'), x: 8.0, y: 0.8, w: 4.8, h: 4.8 });
+  s22.addImage({ path: path.join(__dirname, 'images/img_12_rocket.png'), x: 8.0, y: 0.8, w: 4.8, h: 4.8 });
   s22.addText('Live Demo\n& Future Work', {
     x: 0.8, y: 1.0, w: 7.0, h: 1.8,
     fontSize: 38, fontFace: 'Segoe UI', bold: true, color: C.white, lineSpacingMultiple: 1.1,

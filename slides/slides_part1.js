@@ -12,7 +12,7 @@ function buildPart1(pptx) {
   s1.background = { color: C.accent2 };
   s1.addShape('rect', { x: 0, y: 0, w: '100%', h: 0.14, fill: { color: C.coral } });
   s1.addShape('rect', { x: 0, y: SLIDE_H - 0.14, w: '100%', h: 0.14, fill: { color: C.coral } });
-  s1.addImage({ path: path.join(__dirname, 'images/cover_illustration.png'), x: 7.5, y: 0.8, w: 5.3, h: 5.3 });
+  s1.addImage({ path: path.join(__dirname, 'images/img_01_cover.png'), x: 7.5, y: 0.8, w: 5.3, h: 5.3 });
   s1.addText('Movie Recommender\nSystem', {
     x: 0.8, y: 1.5, w: 6.5, h: 2.2,
     fontSize: 42, fontFace: 'Segoe UI', bold: true, color: C.white, lineSpacingMultiple: 1.1,
@@ -42,14 +42,14 @@ function buildPart1(pptx) {
     'Goal: Predict which items a user will like',
     'Used by Netflix, Amazon, TikTok, Shopee — everywhere',
   ], { w: 6.5 });
-  addImageRight(s2, 'choice_overload.png');
+  addImageRight(s2, 'img_02_recsys.png');
   addHighlightBox(s2, 'Core: Analyze past behavior → Find patterns → Predict → Recommend');
 
   // ══════ SLIDE 3: WHY MOVIES ══════
   const s3 = pptx.addSlide();
   addBg(s3, { slideNum: 3, section: 'Introduction' });
   addTitle(s3, 'Why Movies? Why MovieLens?');
-  addImageRight(s3, 'movie_data_icons.png', { x: 8.0, y: 0.8, w: 4.8, h: 4.8 });
+  addImageRight(s3, 'img_03_movies.png', { x: 8.0, y: 0.8, w: 4.8, h: 4.8 });
   addBullets(s3, [
     'MovieLens: Gold standard for RecSys research',
     '3 versions: 100K / 1M / 25M ratings',
@@ -70,7 +70,7 @@ function buildPart1(pptx) {
   const s4 = pptx.addSlide();
   addBg(s4, { slideNum: 4, section: 'Dataset', accentColor: C.coral });
   addTitle(s4, 'MovieLens 1M — Dataset Overview');
-  addImageRight(s4, 'data_files_matrix.png', { x: 8.0, y: 0.8, w: 4.8, h: 4.5 });
+  addImageRight(s4, 'img_04_dataset.png', { x: 8.0, y: 0.8, w: 4.8, h: 4.5 });
   addBullets(s4, [
     '1,000,209 ratings from 6,040 users on 3,706 movies',
     'Rating scale: 1–5 stars (avg 3.58)',
@@ -112,7 +112,7 @@ function buildPart1(pptx) {
   const s6 = pptx.addSlide();
   addBg(s6, { slideNum: 6, section: 'Dataset', accentColor: C.coral });
   addTitle(s6, 'Data Flow — Which File Feeds Which Algorithm?');
-  s6.addImage({ path: path.join(__dirname, 'images/data_flow_diagram.png'), x: 1.5, y: 1.2, w: 10.3, h: 4.5 });
+  s6.addImage({ path: path.join(__dirname, 'images/img_05_dataflow.png'), x: 1.5, y: 1.2, w: 10.3, h: 4.5 });
   const legend = [
     { label: 'ratings.dat → CF, SVD, Evaluation', color: C.teal },
     { label: 'movies.dat → Content-Based, Hybrid', color: C.coral },
@@ -128,7 +128,7 @@ function buildPart1(pptx) {
   const s7 = pptx.addSlide();
   addBg(s7, { slideNum: 7, section: 'EDA', accentColor: C.golden });
   addTitle(s7, 'Setup & Exploratory Data Analysis');
-  addImageRight(s7, 'scientist_charts.png');
+  addImageRight(s7, 'img_06_eda.png');
   addBullets(s7, [
     'Environment: Google Colab (free GPU/CPU)',
     'Libraries: pandas, numpy, matplotlib, scikit-surprise',
@@ -170,7 +170,7 @@ function buildPart1(pptx) {
   const s9 = pptx.addSlide();
   addBg(s9, { slideNum: 9, section: 'Algorithms', accentColor: C.purple });
   addTitle(s9, 'Algorithm Taxonomy — 5 Approaches');
-  s9.addImage({ path: path.join(__dirname, 'images/algorithm_tree.png'), x: 7.8, y: 0.8, w: 5.2, h: 5.2 });
+  s9.addImage({ path: path.join(__dirname, 'images/img_07_taxonomy.png'), x: 7.8, y: 0.8, w: 5.2, h: 5.2 });
   const tree = [
     '┌─ Collaborative Filtering (CF)',
     '│  ├─ 1. User-Based CF     (find similar users)',

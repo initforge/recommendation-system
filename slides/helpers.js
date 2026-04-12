@@ -105,7 +105,7 @@ function addBullets(slide, items, opts = {}) {
     return { text: item.text, options: { bullet: { code: '25CB' }, indentLevel: item.indent || 1, ...FONT.bullet, fontSize: 12, lineSpacingMultiple: 1.5 } };
   });
 
-  slide.addText(textItems, { x, y, w, h, valign: 'top' });
+  slide.addText(textItems, { x, y, w, h, valign: 'middle' });
 }
 
 // ── Image on right side ────────────────────────────────────
