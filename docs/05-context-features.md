@@ -370,7 +370,7 @@ print(young.head(5))
 ║  → Nữ thích Romance, Drama hơn Nam                               ║
 ║  → Student/Under 18 thích Animation, Children's nhiều            ║
 ║                                                                  ║
-║  ÚNG DỤNG:                                                       ║
+║  ỨNG DỤNG:                                                       ║
 ║  → User mới (cold start): Gợi theo demographics thay vì CF      ║
 ║  → Demo web: Thêm filter theo nhóm tuổi / giới tính            ║
 ║                                                                  ║
@@ -402,7 +402,7 @@ PHÂN TÍCH ĐƯỢC:
   → Thể loại ưa thích theo demographics
   → Genre preferences khác nhau giữa các nhóm
 
-ÚNG DỤNG THỰC TẾ:
+ỨNG DỤNG THỰC TẾ:
   → Context-aware recommendation (nâng cao)
   → Demo: Filter theo nhóm tuổi / giới tính
   → Insights để trình bày với thầy

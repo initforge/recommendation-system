@@ -26,7 +26,7 @@ Backend chịu tải toàn bộ các tác vụ nặng: Load Dataset MovieLens 1M
 3. Chạy toàn bộ các Cell (`Runtime` > `Run all`).
 4. Tại bước cuối cùng của Notebook, hệ thống sẽ yêu cầu cài đặt `ngrok`, `fastapi`, `uvicorn`. Ngrok sẽ tự động tạo một HTTP Tunnel bảo mật.
 5. Copy đường link API có dạng: `https://<random-id>.ngrok-free.dev`. 
-   > **⚠️ Lưu ý:** Đây là Backend API. Cứ mỗi lần restart Colab, đường link này sẽ thay đổi. Vùi lòng không tắt tab Colab nếu muốn web hoạt động.
+   > **Lưu ý:** Đây là Backend API. Cứ mỗi lần restart Colab, đường link này sẽ thay đổi. Vui lòng không tắt tab Colab nếu muốn web hoạt động.
 
 ## Bước 2: Deploy Frontend (Cloudflare Pages)
 

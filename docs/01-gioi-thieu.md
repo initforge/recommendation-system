@@ -59,7 +59,7 @@ User A muốn tìm phim hay trên Netflix
 
 ### Có Recommender System:
 ```
-User A muởn tìm phim hay trên Netflix
+User A muốn tìm phim hay trên Netflix
   → Hệ thống gợi "Phim hay cho bạn" (top 10)
   → Chọn nhanh → Xem → Thích → Ở lại
   → Netflix giữ chân được user

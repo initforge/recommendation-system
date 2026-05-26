@@ -279,7 +279,7 @@ Ví dụ 10 dòng đầu:
 ┌──────────────────────────────────────────────────────────────────┐
 │ CỘT 3: Age (ĐỘ TUỔI)                                           │
 ├──────────────────────────────────────────────────────────────────┤
-│ Kiểu:     Integer (MÃ nhóm tuổi, KHÔNG phải tuổi thật)        │
+│ Kiểu:     Integer (Mã nhóm tuổi, KHÔNG phải tuổi thật)        │
 │                                                           │
 │ Bảng mã:                                                      │
 │ ┌─────────┬───────────────────────┐                          │
@@ -332,14 +332,14 @@ Ví dụ 10 dòng đầu:
 │ │   20    │ writer / journalist              │             │
 │ └─────────┴───────────────────────────────────┘             │
 │                                                           │
-│ ⚠️  CONTEXT FEOURCE — DÙNG ĐƯỢC!                           │
+│ ⚠️  CONTEXT FEATURE — DÙNG ĐƯỢC!                           │
 │   → Phân tích: Nghề nào rating cao / thích thể loại nào?    │
 │   → "Scientist / Engineer → thích Sci-Fi, Documentary"     │
 │   → "Artist → thích Drama, Romance hơn Action"             │
 └──────────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────────┐
-│ CỘT 5: Zip-code (MÃ BƯU CHÍNH)                                │
+│ CỘT 5: Zip-code (Mã bưu chính)                                │
 ├──────────────────────────────────────────────────────────────────┤
 │ Kiểu:     String (5 chữ số)                                    │
 │ Giá trị:  VD: 48067, 70072, 55117...                          │

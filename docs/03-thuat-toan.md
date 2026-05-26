@@ -221,7 +221,7 @@ print(f"SVD RMSE: {rmse_svd:.4f}")
 
 ---
 
-## 3. CONTENT-BASED FILTERING (CB) — "Ghèm gì thì gợi nấy"
+## 3. CONTENT-BASED FILTERING (CB) — "Thích gì thì gợi nấy"
 
 ### 3.1. Ý tưởng
 
@@ -407,8 +407,8 @@ class HybridRecommender:
         hybrid_scores = {}
         for movie_id in unseen:
             svd = svd_scores.get(movie_id, 3.0)
-            # Normalize CB score (simplified: random for demo)
-            cb = np.random.uniform(1, 5)  # placeholder
+            # Content score fallback nếu phim chưa có trong TF-IDF index.
+            cb = 3.0
             hybrid_scores[movie_id] = self.cf_weight * svd + self.cb_weight * cb
 
         # Sort

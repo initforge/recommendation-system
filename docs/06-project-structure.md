@@ -27,7 +27,7 @@ recommend-system/                      ← Thư mục gốc
 │   ├── 06_hybrid.ipynb              ← Hybrid System
 │   ├── 07_context_features.ipynb     ← Temporal + Demographics
 │   ├── 08_evaluation.ipynb          ← So sánh + export CSV
-│   └── 00_full_pipeline.ipynb        ← CHẠY NAY: toàn bộ → export JSON
+│   └── 00_full_pipeline.ipynb        ← Chạy toàn bộ → export JSON
 │
 ├── 📁 frontend/                     ← Web Demo (HTML/CSS/JS) trên Cloudflare Pages
 │   ├── index.html                   ← Giao diện tĩnh tâm (Zen UX)
@@ -445,6 +445,6 @@ src/ gồm 5 files:
 notebooks/ gồm 9 files:
 → 1 notebook = 1 step riêng
 → notebooks 01–08: chạy riêng lẻ để học
-→ notebooks/00_full_pipeline.ipynb: CHẠY CÂY NÀY → export JSON cho web
+→ notebooks/00_full_pipeline.ipynb: chạy toàn bộ pipeline → export JSON cho web
 → Mỗi file có code + kết quả + chart
 ```

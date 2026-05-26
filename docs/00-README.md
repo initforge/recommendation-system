@@ -1,84 +1,62 @@
-# 📋 Mục lục — Recommender System Project
+# Recommender System - Mục lục tài liệu
 
-## 📚 Tài liệu lý thuyết
-1. [01-gioi-thieu.md](./01-gioi-thieu.md) — Recommender System là gì?
-2. [02-tai-sao-chon-phim.md](./02-tai-sao-chon-phim.md) — Tại sao dùng phim + MovieLens
-3. [02b-chi-tiet-dataset.md](./02b-chi-tiet-dataset.md) — Chi tiết từng file trong dataset
-4. [03-thuat-toan.md](./03-thuat-toan.md) — 5 thuật toán + code mẫu (User CF, Item CF, SVD, Content-Based, Hybrid)
-5. [04-danh-gia-metrics.md](./04-danh-gia-metrics.md) — RMSE, Precision, Recall
-6. [05-context-features.md](./05-context-features.md) — Temporal & Demographics Analysis
-7. [06-project-structure.md](./06-project-structure.md) — Cấu trúc dự án, clean code
-8. [07-implementation-roadmap.md](./07-implementation-roadmap.md) — Lộ trình code từng bước
+Tài liệu trong repo có hai nhóm:
 
----
+- **Nhóm học thuật/giải thích**: đọc để hiểu recommender system, MovieLens, thuật toán, metrics và context analysis.
+- **Nhóm current-state**: đọc để biết chính xác source hiện đang chạy như thế nào, API nằm ở đâu, frontend nối backend ra sao và rủi ro vận hành là gì.
 
-## Thứ tự đọc
+## Current-State
 
+| File | Nội dung |
+|---|---|
+| [08-current-technical-specification.md](./08-current-technical-specification.md) | Đặc tả source hiện tại: modules, notebooks, API, frontend, deploy topology, rủi ro. |
+| [../DEPLOY.md](../DEPLOY.md) | Cách chạy backend Colab/FastAPI/ngrok và deploy frontend Cloudflare Pages. |
+
+## Nền tảng lý thuyết
+
+| File | Nội dung |
+|---|---|
+| [01-gioi-thieu.md](./01-gioi-thieu.md) | Recommender System là gì và bài toán lọc thông tin. |
+| [02-tai-sao-chon-phim.md](./02-tai-sao-chon-phim.md) | Vì sao chọn phim và MovieLens cho đồ án. |
+| [02b-chi-tiet-dataset.md](./02b-chi-tiet-dataset.md) | Cấu trúc `ratings.dat`, `movies.dat`, `users.dat`. |
+| [03-thuat-toan.md](./03-thuat-toan.md) | User CF, Item CF, SVD, Content-Based, Hybrid. |
+| [04-danh-gia-metrics.md](./04-danh-gia-metrics.md) | RMSE, MAE, Precision@K, Recall@K, MAP@K, NDCG@K. |
+| [05-context-features.md](./05-context-features.md) | Temporal và demographics analysis. |
+| [06-project-structure.md](./06-project-structure.md) | Cấu trúc thư mục và module. |
+| [07-implementation-roadmap.md](./07-implementation-roadmap.md) | Lộ trình triển khai notebook/pipeline/frontend/slides. |
+
+## Thứ tự đọc khuyến nghị
+
+```text
+1. README-vi.md hoặc README.md
+2. docs/08-current-technical-specification.md
+3. docs/02b-chi-tiet-dataset.md
+4. docs/03-thuat-toan.md
+5. docs/04-danh-gia-metrics.md
+6. docs/05-context-features.md
+7. DEPLOY.md nếu cần chạy demo web
 ```
-Bước 1: Đọc 01, 02, 02b          → Hiểu bài toán + dataset
-Bước 2: Đọc 03                    → Hiểu 5 thuật toán
-Bước 3: Đọc 04                     → Hiểu cách đánh giá
-Bước 4: Đọc 05                     → Hiểu context features
-Bước 5: Đọc 06, 07               → Hiểu tổ chức + lộ trình
-```
-
----
 
 ## Tech Stack
 
-```
-Development:  Google Colab (.ipynb)
-Web Demo:     Cloudflare Pages + FastAPI (ngrok)
-ML Library:   scikit-learn, scikit-surprise
-Data:         pandas, numpy
-Visualize:    matplotlib, seaborn
-```
+| Layer | Stack |
+|---|---|
+| Data | MovieLens 1M, pandas, NumPy |
+| Recommendation | scikit-surprise, scikit-learn, SciPy |
+| Algorithms | KNNWithMeans, SVD, TF-IDF, cosine similarity, weighted hybrid |
+| Evaluation | RMSE, MAE, Precision@K, Recall@K, F1@K, MAP@K, NDCG@K |
+| Runtime demo | Google Colab, FastAPI, uvicorn, ngrok |
+| Frontend | Static HTML, Tailwind CDN, vanilla JavaScript |
+| Hosting | Cloudflare Pages for frontend, Colab runtime for backend |
 
----
+## Cấu trúc chính
 
-## 5 thuật toán làm trong đồ án
-
-```
-1. User-Based CF      — Collaborative Filtering (user similarity)
-2. Item-Based CF      — Collaborative Filtering (item similarity)
-3. SVD              — Matrix Factorization (latent factors)
-4. Content-Based    — TF-IDF + Genres similarity
-5. Hybrid           — SVD + Content-Based (weighted)
-
-+ Context Analysis  — Temporal (timestamp) + Demographics (gender, age, occupation)
-```
-
----
-
-## Cấu trúc project
-
-```
-recommend-system/
-├── docs/           ← Tài liệu (đọc hiểu)
-├── notebooks/      ← 8 Colab notebooks
-├── frontend/       ← Giao diện Web (HTML/JS/CSS)
-├── src/            ← 5 Python modules (shared)
-│   ├── constants.py
-│   ├── data_loader.py
-│   ├── models.py
-│   ├── evaluation.py
-│   └── context.py
-├── data/raw/       ← MovieLens 1M dataset
-├── results/        ← Charts + reports
-└── slides/         ← Presentation
-```
-
----
-
-## Lộ trình 10 phase
-
-```
-Phase 1-2: Setup + EDA
-Phase 3-4: User CF + Item CF
-Phase 5:   SVD + Content-Based
-Phase 6:   Hybrid
-Phase 7:   Context Analysis
-Phase 8:   Evaluation + So sánh
-Phase 9:   Web Demo + Deploy
-Phase 10:  Báo cáo + Trình bày
+```text
+src/                 Python modules dùng chung
+notebooks/           8 notebooks từng bước + 00_full_pipeline.ipynb
+frontend/            Static web client nối tới ngrok API
+docs/                Tài liệu học thuật và đặc tả
+data/raw/ml-1m/      MovieLens 1M dataset
+results/             Export charts/reports từ notebooks
+slides/              Presentation, notes, diagrams, formula images
 ```
